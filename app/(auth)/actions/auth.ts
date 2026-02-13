@@ -37,7 +37,7 @@ export async function signup(formData: FormData) {
     const password = formData.get('password') as string
     const fullName = formData.get('full_name') as string
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -52,6 +52,11 @@ export async function signup(formData: FormData) {
         return { error: error.message }
     }
 
+    // Force sign out to prevent auto-login (which causes middleware to redirect to dashboard)
+    if (data.session) {
+        await supabase.auth.signOut()
+    }
+
     revalidatePath('/', 'layout')
-    redirect('/login?message=Check your email for confirmation (or you are logged in if email confirmation is disabled)')
+    redirect('/login?message=Check your email for confirmation.')
 }

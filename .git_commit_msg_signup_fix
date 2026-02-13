@@ -1,0 +1,4 @@
+fix: prevent auto-login after signup
+
+- Updated signup action to force signOut if a session is created.
+- Ensures users are redirected to login page with confirmation message instead of dashboard.
