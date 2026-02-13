@@ -1,0 +1,3 @@
+fix: add missing alert component
+
+- Created components/ui/alert.tsx to resolve build error.
