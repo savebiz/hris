@@ -240,7 +240,7 @@ export async function getAdminDashboardStats() {
     return {
         totalEmployees: employeeCount || 0,
         pendingRequests: pendingCount || 0,
-        pendingRequests: pendingCount || 0,
+
         onLeaveToday: onLeaveCount || 0
     }
 }

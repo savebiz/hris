@@ -1,0 +1,3 @@
+fix: remove duplicate object property
+
+- Fixed build error in admin/actions.ts caused by duplicate key in return object.
