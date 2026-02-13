@@ -1,0 +1,6 @@
+feat: implement V2 features (audit, privacy, manager)
+
+- Added Audit Logs system (table + ui + integration).
+- Added Privacy and Terms of Service pages.
+- Implemented Manager Role workflow (dashboard + actions).
+- Created Profile Change Requests schema.

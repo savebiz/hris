@@ -1,8 +1,7 @@
-'use server'
-
 import { createClient } from '@/lib/supabase/server'
 import { LeaveFormValues, leaveSchema } from '@/lib/schemas/leave'
 import { revalidatePath } from 'next/cache'
+import { logAction } from '@/lib/audit'
 
 export async function submitLeaveRequest(data: LeaveFormValues) {
     const supabase = await createClient()
@@ -33,6 +32,18 @@ export async function submitLeaveRequest(data: LeaveFormValues) {
     }
 
     revalidatePath('/employee/leaves')
+
+    // Log action
+    // Note: We don't have the inserted ID returned easily unless we select it.
+    // Ideally we should modify insert to select().
+    // For now we log without ID or generic.
+    await logAction({
+        action: 'create',
+        resourceType: 'leave_request',
+        actorId: user.id,
+        details: { type: data.leave_type }
+    })
+
     return { success: true, message: "Leave request submitted successfully" }
 }
 
@@ -66,6 +77,15 @@ export async function uploadEmployeeDocument(formData: FormData) {
 
     revalidatePath('/employee/documents')
     revalidatePath('/employee/dashboard')
+
+    await logAction({
+        action: 'upload',
+        resourceType: 'document',
+        resourceId: filePath,
+        actorId: user.id,
+        details: { size: file.size }
+    })
+
     return { success: true, message: "Document uploaded successfully" }
 }
 
@@ -111,6 +131,14 @@ export async function getDocumentUrl(path: string) {
         console.error("Error creating signed URL:", error)
         return null
     }
+
+    // Log view
+    logAction({
+        action: 'view',
+        resourceType: 'document',
+        resourceId: path,
+        actorId: user.id
+    })
 
     return data.signedUrl
 }

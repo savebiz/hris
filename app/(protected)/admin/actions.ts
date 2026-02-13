@@ -1,8 +1,7 @@
-'use server'
-
 import { createClient } from '@/lib/supabase/server'
 import { ProfileFormValues, profileSchema } from '@/lib/schemas/profile'
 import { revalidatePath } from 'next/cache'
+import { logAction } from '@/lib/audit'
 
 export async function createStaffAction(data: ProfileFormValues) {
     const supabase = await createClient()
@@ -192,6 +191,18 @@ export async function getDocumentUrl(path: string) {
     if (error) {
         console.error("Error creating signed URL:", error)
         return null
+    }
+
+    // Log view action (audit)
+    // We do this async without awaiting to not block UI
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+        logAction({
+            action: 'view',
+            resourceType: 'document',
+            resourceId: path,
+            actorId: user.id
+        })
     }
 
     return data.signedUrl
