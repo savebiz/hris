@@ -77,7 +77,8 @@ export async function getLeaveRequests() {
         .from('leave_requests')
         .select(`
             *,
-            profiles:user_id (full_name, avatar_url)
+            profiles:user_id (full_name, avatar_url),
+            leave_balances:user_id (annual_total, annual_used, sick_total, sick_used, casual_total, casual_used)
         `)
         .order('created_at', { ascending: false })
 

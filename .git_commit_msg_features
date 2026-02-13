@@ -1,0 +1,5 @@
+feat: add leave balance and duration to admin view
+
+- Created `leave_balances` table schema.
+- Updated server action to join leave info.
+- Added Duration and Balance columns to Admin Leave Table.
