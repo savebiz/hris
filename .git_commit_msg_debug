@@ -1,0 +1,4 @@
+feat: add role validation to admin leave page
+
+- Added explicit role check on Admin Leave page to warn users if they lack 'hr_admin' role.
+- Created supabase/promote_admin.sql script to help users promote themselves.
