@@ -1,0 +1,6 @@
+fix: fetch leave balances separately to avoid sql join errors
+
+- Updated getLeaveRequests to fetch leave_requests and leave_balances independently.
+- Merged data in server action.
+- Updated UI to display Duration and Balance with fallback N/A.
+- Prevents page crash if leave_balances table is missing.

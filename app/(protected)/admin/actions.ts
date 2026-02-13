@@ -77,8 +77,7 @@ export async function getLeaveRequests() {
         .from('leave_requests')
         .select(`
             *,
-            profiles:user_id (full_name, avatar_url),
-            leave_balances:user_id (annual_total, annual_used, sick_total, sick_used, casual_total, casual_used)
+            profiles:user_id (full_name, avatar_url)
         `)
         .order('created_at', { ascending: false })
 
@@ -87,7 +86,34 @@ export async function getLeaveRequests() {
         return { data: [], error: error.message }
     }
 
-    return { data: leaves, error: null }
+    // Fetch balances for all unique users in the requests
+    const userIds = Array.from(new Set(leaves.map((l: any) => l.user_id)))
+
+    // Only attempt to fetch if we have users (and if table exists - user might not have run migration yet)
+    // We wrap this in try/catch or just handle error gracefully if table doesn't exist
+    let balancesMap: Record<string, any> = {}
+    try {
+        const { data: balances, error: balanceError } = await supabase
+            .from('leave_balances')
+            .select('*')
+            .in('user_id', userIds)
+
+        if (!balanceError && balances) {
+            balances.forEach((b: any) => {
+                balancesMap[b.user_id] = b
+            })
+        }
+    } catch (err) {
+        console.warn("Could not fetch balances (table might not exist yet)", err)
+    }
+
+    // Merge balances into leaves data
+    const leavsWithBalance = leaves.map((l: any) => ({
+        ...l,
+        leave_balances: balancesMap[l.user_id] || null
+    }))
+
+    return { data: leavsWithBalance, error: null }
 }
 
 export async function approveLeaveRequest(id: string) {

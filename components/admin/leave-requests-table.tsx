@@ -16,6 +16,35 @@ import { approveLeaveRequest, rejectLeaveRequest } from "@/app/(protected)/admin
 import { useTransition } from "react"
 import { toast } from "@/hooks/use-toast"
 
+function calculateDuration(startDate: string, endDate: string) {
+    try {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const diffTime = Math.abs(end.getTime() - start.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        return `${diffDays} days`
+    } catch (e) {
+        return "N/A"
+    }
+}
+
+function getBalanceDisplay(request: any) {
+    const balances = request.leave_balances
+    if (!balances) return "N/A"
+
+    const type = request.leave_type?.toLowerCase() || ""
+    if (type.includes("annual")) {
+        return `${balances.annual_total - balances.annual_used}/${balances.annual_total}`
+    }
+    if (type.includes("sick")) {
+        return `${balances.sick_total - balances.sick_used}/${balances.sick_total}`
+    }
+    if (type.includes("casual")) {
+        return `${balances.casual_total - balances.casual_used}/${balances.casual_total}`
+    }
+    return "N/A"
+}
+
 interface LeaveRequest {
     id: string
     user_id: string
@@ -67,6 +96,8 @@ export function LeaveRequestsTable({ data }: LeaveRequestsTableProps) {
                 <TableRow>
                     <TableHead>Staff</TableHead>
                     <TableHead>Type</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead>Balance</TableHead>
                     <TableHead>Dates</TableHead>
                     <TableHead>Reason</TableHead>
                     <TableHead>Status</TableHead>
@@ -89,6 +120,8 @@ export function LeaveRequestsTable({ data }: LeaveRequestsTableProps) {
                             </div>
                         </TableCell>
                         <TableCell className="capitalize">{request.leave_type} Leave</TableCell>
+                        <TableCell>{calculateDuration(request.start_date, request.end_date)}</TableCell>
+                        <TableCell>{getBalanceDisplay(request)}</TableCell>
                         <TableCell className="text-sm">
                             {new Date(request.start_date).toLocaleDateString()} - {new Date(request.end_date).toLocaleDateString()}
                         </TableCell>
