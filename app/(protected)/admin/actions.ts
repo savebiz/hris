@@ -191,5 +191,39 @@ export async function getDocumentUrl(path: string) {
     return data.signedUrl
 }
 
+export async function getAdminDashboardStats() {
+    const supabase = await createClient()
+    const today = new Date().toISOString() // or just Date().toISOString().split('T')[0] for date comparison if needed
+
+    // 1. Total Employees
+    const { count: employeeCount, error: empError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+
+    // 2. Pending Leave Requests
+    const { count: pendingCount, error: pendingError } = await supabase
+        .from('leave_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending')
+
+    // 3. People on Leave Today (Approved & Date Range overlap)
+    // Supabase range filters can be tricky. 
+    // We want where start_date <= today AND end_date >= today
+    const { count: onLeaveCount, error: onLeaveError } = await supabase
+        .from('leave_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'approved')
+        .lte('start_date', today)
+        .gte('end_date', today)
+
+    if (empError) console.error("Error fetching employee count:", empError)
+
+    return {
+        totalEmployees: employeeCount || 0,
+        pendingRequests: pendingCount || 0,
+        onLeaveToday: onLeaveCount || 0
+    }
+}
+
 
 

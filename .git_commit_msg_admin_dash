@@ -1,0 +1,6 @@
+feat: modernize admin dashboard
+
+- Implemented statistics cards (Total Staff, Pending Leaves, On Leave).
+- Added getAdminDashboardStats counting action.
+- Redesigned layout with Quick Action grid and System Overview.
+- Visual improvements with Lucide icons and Shadcn cards.
