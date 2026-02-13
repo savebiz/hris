@@ -1,0 +1,4 @@
+fix: pass userId to DocumentManager
+
+- Resolved build error where DocumentManager required userId prop.
+- Updated page.tsx to fetch current user and pass ID.
