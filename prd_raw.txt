@@ -1,0 +1,826 @@
+DataGuard Employee Portal: 
+Product Requirements 
+Document (PRD)  
+Document Version:  1.0 
+Date:  February 13, 2026  
+Product Owner:  HR Department  
+Solution Developer:  IT Department  
+Platform URL:  dataguardng.com/employee -portal  
+ 
+Executive Summary  
+The DataGuard Employee Portal is an internal web -based Human Resource Information 
+System (HRIS) designed to centralize employee data, automate HR workflows, and provide 
+self-service capabilities for both Core Staff and Support Staff. The system addresses c ritical 
+delays in HR service delivery by establishing a single source of truth for employee records, 
+reducing manual processes, and enabling data -driven operational decisions[1][2].  
+This PRD defines the technical requirements, feature specifications, data structures, user 
+roles, and implementation roadmap for a two -phase deployment prioritizing speed, usability, 
+and security.  
+ 
+Product Vision and Objectives  
+Vision  
+To build a simple, secure Employee Portal that empowers DataGuard staff with self -service 
+capabilities while providing HR with centralized data management and reporting tools.  
+Primary Objectives  
+• Establish single source of truth for all employee data (Core and Support Staff)  
+• Reduce manual HR processes by 50 -70% through automation and self -service[1]  
+• Support HR reporting and operational decision -making with real -time data  
+• Ensure system usability requires minimal training for all staff categories  
+• Deploy Phase 1 within 6 -8 weeks to address current service delivery delays[2]  
+Success Metrics  
+• 95% data accuracy post -migration  
+• 80% user login rate within Week 1 of launch  
+• Leave approval cycle reduced to $<$48 hours  
+• $<$5% support tickets per week post -stabilization  
+• HR administrative time reduced by 50% within 3 months[1]  
+ 
+User Roles and Access Levels  
+The system implements role -based access control (RBAC) with three distinct user types:  
+Role Definition Table  
+Role  Access Permissions  Key Functions  
+HR 
+Administrator  Full system access: Create, Read, Update, 
+Delete all records; Configure workflows; 
+Generate reports  Data management, 
+approvals, reporting  
+Line Manager  Read access to direct reports only; Approve 
+leave requests; View team data  Team oversight, leave 
+approval  
+Core Staff  Read access to own records; Submit 
+requests; Update limited fields  Self-service, leave 
+application  
+Support Staff  Limited/no access initially (Phase 1); HR -
+managed records  Passive data subject  
+ 
+Table 1: User role definitions and access matrix  
+ 
+System Architecture  
+Technical Stack Recommendations  
+Based on DataGuard's existing infrastructure and the need for rapid deployment with limited 
+resources[3][4]:  
+Frontend:  
+• Next.js 14+ (React framework) for web -responsive interface  
+• Tailwind CSS for UI styling  
+• Mobile -first responsive design (no dedicated mobile app Phase 1)  
+Backend:  
+• Supabase for authentication, database (PostgreSQL), and storage  
+• Row -Level Security (RLS) policies for role -based access  
+• RESTful API architecture  
+Security:  
+• NDPR -compliant data encryption at rest and in transit  
+• SSL/TLS certificates for dataguardng.com  subdomain  
+• Multi -factor authentication (MFA) for HR administrators  
+• Session timeout after 30 minutes of inactivity  
+Hosting:  
+• Vercel for frontend deployment  
+• Supabase cloud for backend and database  
+• Cloudflare CDN for static assets  
+System Integration Points  
+• Email : SMTP integration for notifications (leave approvals, password resets)  
+• WhatsApp : Optional webhook integration for critical alerts  
+• Excel Import/Export : Bulk data upload using HR templates; report downloads  
+• Document Storage : Secure file repository for CVs, contracts, IDs (max 5MB per 
+file) 
+ 
+Phase 1: Core HR Data & Self -Service 
+(Foundation Phase)  
+Timeline:  6-8 weeks from kickoff  
+Priority:  IMMEDIATE  
+Users:  Core Staff & Support Staff (HR -managed)  
+A. Core Staff Module - Phase 1 Features  
+1. Personal Biodata Management  
+Fields (Read/Write for HR; Read -Only for Staff):  
+Field Name  Data Type  Validation Rules  
+Full Name  Text (100 chars)  Required, alphabetic only  
+Staff ID  Text (unique, 10 chars)  Auto -generated, immutable  
+Photograph  Image file  JPG/PNG, max 2MB  
+Date of Birth  Date  Required, age 18 -65 
+Gender  Dropdown  Male/Female/Other  
+Phone Number  Text (15 chars)  Required, Nigerian format (+234)  
+Email Address  Email  Required, unique, validated  
+Residential Address  Text (200 chars)  Required  
+Emergency Contact  Text (100 chars)  Required (Name + Phone)  
+ 
+Table 2: Core Staff biodata fields  
+Functional Requirements:  
+• Staff can view all fields but cannot directly edit  
+• Staff can submit "Request Correction" form (triggers HR workflow)  
+• HR receives notification and approves/rejects changes  
+• Audit log tracks all biodata modifications with timestamp and user  
+2. Employment Information (Read -Only for Staff)  
+Field Name  Data Type  Validation Rules  
+Job Title  Text (100 chars)  Required  
+Department  Dropdown  Pre-configured list  
+Unit  Dropdown  Dependent on department  
+Line Manager  Dropdown  Staff lookup  
+Date of Employment  Date  Required, cannot be future  
+Employment Status  Dropdown  Confirmed/Contract/Probation  
+ 
+Table 3: Employment information fields  
+Functional Requirements:  
+• Only HR can update these fields  
+• Line Manager dropdown filters by department hierarchy  
+• Employment Status triggers automatic alerts (e.g., probation expiry in 30 days)  
+3. Document Repository  
+Document Types:  
+• Curriculum Vitae (CV)  
+• Offer Letter  
+• Employment Contract  
+• Job Description (JD)  
+Functional Requirements:  
+• HR uploads documents; staff can view/download only  
+• Each document type limited to one active file (versioning supported)  
+• Supported formats: PDF, DOCX, JPG, PNG (max 5MB per file)  
+• Documents encrypted at rest using AES -256 
+• Download audit trail (who accessed what document, when)  
+4. Leave Management System  
+Leave Types:  
+• Annual Leave  
+• Casual Leave  
+• Sick Leave  
+• Maternity/Paternity Leave  
+• Study Leave  
+• Compassionate Leave  
+Leave Balance Calculation:  
+Leave Balance =Annual Entitlement −Leave Taken −Pending Requests  
+Functional Requirements:  
+For Staff:  
+• View current leave balances by type  
+• Submit leave application form (start date, end date, leave type, reason)  
+• View leave history (Approved/Pending/Declined with reasons)  
+• Receive email/WhatsApp notification on status change  
+For Line Managers:  
+• View pending leave requests for direct reports  
+• Approve or decline with mandatory comments  
+• View team leave calendar to avoid conflicts  
+For HR:  
+• Final approval after line manager approval  
+• Override capability for emergency cases  
+• Manually adjust leave balances (with audit log)  
+• Generate leave reports (by staff, department, period)  
+Leave Workflow:  
+1. Staff submits leave request  
+2. System validates leave balance sufficiency  
+3. Notification sent to Line Manager  
+4. Line Manager approves/declines  
+5. If approved, notification sent to HR  
+6. HR gives final approval  
+7. Staff receives confirmation with updated balance  
+8. Leave reflected in HR dashboard and calendar  
+Validation Rules:  
+• Leave start date must be at least 3 working days in future (except sick leave)  
+• Cannot apply for leave if balance is insufficient  
+• Cannot have overlapping leave requests  
+• Maximum consecutive days: 21 (configurable by HR)  
+5. Employee Self -Service Dashboard  
+Dashboard Components:  
+• Profile summary card (photo, name, job title, staff ID)  
+• Leave balance overview (visual gauge for each type)  
+• Recent leave requests status (last 5)  
+• Quick actions: Apply Leave, Request Correction, Download Documents  
+• Upcoming company events/announcements (HR -posted)  
+B. Support Staff Module - Phase 1 Features  
+Support Staff records are HR -managed with limited or no self -service access initially. Focus 
+on data capture and status tracking.  
+1. Personal Biodata (HR -Managed)  
+Field Name  Data Type  Validation Rules  
+Full Name  Text (100 chars)  Required  
+Photograph  Image file  JPG/PNG, max 2MB  
+Phone Number  Text (15 chars)  Required, Nigerian format  
+Residential Address  Text (200 chars)  Required  
+Next of Kin  Text (150 chars)  Required (Name + Phone)  
+ 
+Table 4: Support Staff biodata fields  
+2. Employment & Deployment Details  
+Field Name  Data Type  Validation Rules  
+Date of Engagement  Date  Required  
+Project/Client Assignment  Text (100 chars)  Required  
+Project Location  Text (150 chars)  Required  
+Deployment Start Date  Date  Required  
+Deployment End Date  Date  Optional (ongoing if null)  
+Supervisor/Site Contact  Text (100 chars)  Required  
+ 
+Table 5: Support Staff deployment fields  
+Functional Requirements:  
+• HR can add/edit all fields  
+• System calculates deployment duration automatically  
+• Alert generated when deployment end date approaches (7 days prior)  
+• Support Staff can be reassigned to new projects (creates deployment history)  
+3. Documentation (HR Upload)  
+• Curriculum Vitae  
+• Valid ID (National ID, Driver's License, Passport)  
+• Guarantor Details (Name, Phone Number, Address, Signature)  
+Functional Requirements:  
+• HR uploads and manages all documents  
+• System flags missing or expired documents  
+• ID expiry tracking with 30 -day advance notification  
+4. Status Tracking  
+Status Options:  
+• Active (currently deployed)  
+• On Leave (temporary absence)  
+• Disengaged (contract ended)  
+Functional Requirements:  
+• Status dropdown with color -coded badges (Active=Green, On Leave=Yellow, 
+Disengaged=Red)  
+• Status change triggers notification to supervisor  
+• Disengaged staff records archived but accessible for historical reporting  
+C. Data Templates for Migration  
+HR to provide Excel templates mirroring portal data structures for initial bulk upload and 
+future imports.  
+Required Templates:  
+1. Core Staff Records Template  
+o Sheet 1: Personal Biodata (columns match biodata fields)  
+o Sheet 2: Employment Information  
+o Sheet 3: Leave Balances (current year entitlements)  
+2. Support Staff Records Template  
+o Sheet 1: Personal Biodata  
+o Sheet 2: Deployment Details  
+o Sheet 3: Guarantor Information  
+3. Deployment & Project Data Template  
+o Columns: Staff ID, Project Name, Location, Start Date, End Date, Supervisor  
+Template Specifications:  
+• Headers must match database field names exactly  
+• Date format: DD/MM/YYYY  
+• Required fields highlighted in template  
+• Validation rules documented in template instructions tab  
+• Import function validates data before upload, reports errors for correction  
+ 
+Phase 1 Exclusions (Scope Control)  
+To prevent over -engineering and ensure rapid deployment, the following are explicitly 
+excluded from Phase 1:  
+• Payroll processing and salary management  
+• Biometric attendance/time tracking systems  
+• Advanced analytics and predictive insights  
+• Native mobile applications (web -responsive design only)  
+• Integration with external payroll/accounting software  
+• Performance appraisal workflows  
+• Recruitment and applicant tracking  
+These features are deferred to Phase 2 or future iterations based on Phase 1 stabilization and 
+user feedback.  
+ 
+Phase 2: Performance, Learning & HR 
+Operations  
+Timeline:  To commence immediately after Phase 1 stabilization (estimated 8 -10 weeks post -
+Phase 1 launch)  
+Priority:  HIGH  
+Focus:  Talent development, performance tracking, and HR reporting capabilities  
+A. Core Staff Module - Phase 2 Features  
+1. Performance Management System  
+Annual Performance Cycle:  
+1. Goal Setting  (Q1)  
+• HR defines performance template (SMART goals framework)  
+• Staff and Line Manager collaboratively set 3 -5 annual goals  
+• Goals aligned with department objectives  
+• Weight assigned to each goal (total = 100%)  
+2. Mid -Year Review  (Q2/Q3)  
+• Staff self -assessment against each goal (progress %)  
+• Line Manager comments and progress rating (1 -5 scale)  
+• Identify challenges and support needed  
+3. End -of-Year Appraisal  (Q4)  
+• Staff final self -assessment  
+• Line Manager ratings and comments per goal  
+• Overall performance score calculation (weighted average)  
+• HR final review and approval  
+• Performance outcome: Exceeds/Meets/Needs Improvement  
+Performance Rating Scale:  
+Rating  Label  Description  
+5 Exceptional  Consistently exceeds expectations  
+4 Exceeds Expectations  Frequently surpasses goals  
+3 Meets Expectations  Achieves all set objectives  
+2 Needs Improvement  Some goals not fully met  
+1 Unsatisfactory  Significant performance gaps  
+ 
+Table 6: Performance rating definitions  
+Functional Requirements:  
+• Email reminders for pending reviews (7 days before deadline)  
+• Performance history accessible to staff and managers  
+• HR dashboard showing completion rates by department  
+• Export performance reports for compensation reviews  
+2. Learning & Development (L&D)  
+Training History Tracking:  
+• Training course name and provider  
+• Training date and duration  
+• Training type (Internal/External, Mandatory/Optional)  
+• Completion status and certificate upload  
+Mandatory Training Tracker:  
+• HR assigns mandatory courses (e.g., Cybersecurity, Compliance)  
+• Staff notified of assignments with deadlines  
+• Completion status tracked; overdue flagged  
+• Dashboard shows compliance percentage by staff/department  
+Training Request Workflow:  
+1. Staff submits training request (course name, provider, cost, justification)  
+2. Line Manager reviews and recommends/rejects  
+3. HR approves based on budget and relevance  
+4. Upon completion, staff uploads certificate  
+5. Training added to permanent record  
+Certification Management:  
+• Upload professional certifications (ACCA, PMP, etc.)  
+• Expiry date tracking with renewal reminders  
+• Certifications visible on staff profile  
+3. Career & Progression Records  
+Historical Tracking:  
+• Promotions : Previous and current job titles, effective dates, salary grade changes  
+• Role Changes : Lateral moves, department transfers, reason for change  
+• Internal Transfers : Location or unit changes, transfer justification  
+Functional Requirements:  
+• Career timeline visualization (graphical representation)  
+• HR can add progression events with supporting documents  
+• Staff can view their career history  
+• Reports on promotion rates and internal mobility trends  
+B. Support Staff Module - Phase 2 Features  
+1. Deployment History  
+Historical Data Capture:  
+• List of all past project assignments  
+• Duration per project (auto -calculated from start/end dates)  
+• Project location and client name  
+• Supervisor name per assignment  
+Functional Requirements:  
+• Chronological view of deployments (newest first)  
+• Filter by date range, client, or location  
+• Export deployment history per staff member  
+• Calculate total service duration across all projects  
+2. Supervisor Feedback System  
+Simple Rating & Comments:  
+• Supervisor submits feedback at deployment end  
+• Rating scale: 1 -5 (Poor to Excellent)  
+• Text field for qualitative comments (200 chars)  
+• Feedback linked to specific deployment record  
+Functional Requirements:  
+• HR receives notification when supervisor submits feedback  
+• Staff cannot view feedback (internal HR use only)  
+• Average rating calculated across all deployments  
+• Low ratings (1 -2) trigger HR review flag  
+3. Compliance Tracking  
+ID Validity Monitoring:  
+• Capture ID expiry date at upload  
+• Automated alerts 30 days before expiry  
+• Dashboard shows expired/expiring IDs by staff  
+Documentation Status:  
+• Real -time status indicators: Complete (Green), Incomplete (Yellow), Expired (Red)  
+• Checklist view: CV, Valid ID, Guarantor Details  
+• Bulk compliance report for all support staff  
+C. HR & Admin Backend - Phase 2  
+1. HR Dashboard (Centralized Analytics)  
+Key Metrics:  
+Metric  Visualization  
+Total Headcount (Core vs Support)  Pie chart  
+Active vs Inactive Staff  Bar chart  
+Leave Statistics (by type, department)  Line graph  
+Probation Expiry (next 30 days)  Table with alerts  
+Support Staff Deployment Status  Stacked bar (Active/On Leave/Disengaged)  
+Performance Review Completion Rate  Progress bar per department  
+Training Compliance Rate  Gauge chart  
+ 
+Table 7: HR dashboard components  
+Functional Requirements:  
+• Real -time data refresh (every 5 minutes)  
+• Date range filters (custom or predefined: This Month, This Quarter, This Year)  
+• Drill -down capability (click chart element to view details)  
+• Export dashboard snapshot as PDF  
+2. Data Export Functionality  
+Exportable Reports:  
+1. Staff List Report  
+o Filters: Department, Status, Employment Type  
+o Fields: Staff ID, Name, Job Title, Department, Employment Date, Status  
+o Format: Excel (.xlsx), CSV  
+2. Deployment Data Report  
+o Filters: Date Range, Client, Location, Status  
+o Fields: Staff ID, Name, Project, Location, Start Date, End Date, Duration  
+o Format: Excel (.xlsx), CSV  
+3. Leave Records Report  
+o Filters: Date Range, Leave Type, Department, Approval Status  
+o Fields: Staff ID, Name, Leave Type, Start Date, End Date, Days, Status  
+o Format: Excel (.xlsx), CSV  
+4. Performance Summary Report  
+o Filters: Appraisal Cycle, Department, Rating Range  
+o Fields: Staff ID, Name, Overall Rating, Manager Comments, HR Comments  
+o Format: Excel (.xlsx), PDF  
+Functional Requirements:  
+• One -click export from dashboard  
+• Reports generated asynchronously for large datasets ($>$1000 records)  
+• Email download link when report ready (for async exports)  
+• Export history log (who exported what report, when)  
+3. Role -Based Access Control (RBAC) - Enhanced  
+Granular Permissions:  
+Function  HR Admin  Line Manager  Staff  
+View Own Data  ✓ ✓ ✓ 
+View Team Data  ✓ ✓ × 
+View All Data  ✓ × × 
+Edit Own Profile  × (via request)  × (via request)  × (via request)  
+Edit Team Data  ✓ × × 
+Edit All Data  ✓ × × 
+Approve Leave  ✓ ✓ (team only)  × 
+Generate Reports  ✓ ✓ (team only)  × 
+System Configuration  ✓ × × 
+ 
+Table 8: Role -based access matrix  
+Functional Requirements:  
+• HR can create custom roles (e.g., HR Viewer, HR Editor)  
+• Audit log tracks all access and actions by user  
+• Session -based access control with automatic logout  
+• MFA enforcement for HR administrators  
+ 
+Non -Functional Requirements  
+1. Performance Requirements  
+• Page load time: $<$2 seconds on 4G connection  
+• Search results: $<$1 second for queries returning $<$100 records  
+• Report generation: $< 5𝑠𝑒𝑐𝑜𝑛𝑑𝑠𝑓𝑜𝑟𝑠𝑡𝑎𝑛𝑑𝑎𝑟𝑑𝑒𝑥𝑝𝑜𝑟𝑡𝑠 (<$1000 records)  
+• Concurrent users: Support 100+ simultaneous users without degradation  
+• Database query optimization: All queries $<$500ms execution time  
+2. Security Requirements  
+• Authentication : Username/password with bcrypt hashing (cost factor 12)  
+• Authorization : JWT tokens with 30 -minute expiry, refresh token rotation  
+• Data Encryption : AES -256 for data at rest, TLS 1.3 for data in transit  
+• NDPR Compliance : Obtain explicit consent for data processing; provide data 
+deletion capability[5]  
+• Audit Logging : Log all CRUD operations with user ID, timestamp, IP address  
+• Backup : Automated daily backups at 2:00 AM WAT, 30 -day retention  
+• Vulnerability Scanning : Monthly automated scans, quarterly penetration testing  
+3. Usability Requirements  
+• Accessibility : WCAG 2.1 Level AA compliance (keyboard navigation, screen reader 
+support)  
+• Multi -Language : English (default); future support for Pidgin/Yoruba/Hausa  
+• Mobile Responsiveness : Functional on devices $ \geq$320px width  
+• Browser Support : Chrome 90+, Firefox 88+, Safari 14+, Edge 90+  
+• Training : No more than 30 minutes required for basic staff usage  
+• Help Documentation : In-app tooltips, searchable FAQ, video tutorials  
+4. Reliability Requirements  
+• Uptime : 99.5% availability (approximately 3.6 hours downtime/month)  
+• Maintenance Window : Sundays 2:00 -4:00 AM WAT for updates  
+• Error Handling : Graceful degradation with user -friendly error messages  
+• Data Integrity : Database transactions with rollback on failure  
+• Disaster Recovery : RTO (Recovery Time Objective) $<$4 hours, RPO (Recovery 
+Point Objective) $<$1 hour  
+ 
+Implementation Roadmap  
+Phase 1: Foundation (Weeks 1 -8) 
+Week  Deliverables  Owner  
+1-2 Requirements finalization, Excel template design, data cleansing, 
+environment setup  HR/IT  
+3-4 Core & Support Staff modules build, authentication, RBAC 
+implementation, database schema creation  IT 
+5 Leave management workflow, document repository, data import 
+functionality  IT 
+6 Internal alpha testing (10 users), bug fixes, UI/UX refinements  HR/IT  
+7 User training (all staff), documentation, beta launch to full 
+organization  HR 
+8 Stabilization, issue resolution, performance monitoring, feedback 
+collection  IT 
+ 
+Table 9: Phase 1 implementation timeline  
+Critical Path Items:  
+• Week 2: Excel templates must be finalized for Week 3 development  
+• Week 4: Database schema locked; changes require change request  
+• Week 6: Alpha test sign -off required before proceeding to Week 7  
+Phase 2: Enhancement (Weeks 9 -18)  
+Week  Deliverables  Owner  
+9-10 Performance management module (goal setting, reviews), appraisal 
+templates  IT/HR  
+11-12 Learning & Development system, training tracker, certification 
+management  IT 
+13-14 Career progression records, deployment history, supervisor 
+feedback  IT 
+15-16 HR dashboard with analytics, data export functionality, advanced 
+reporting  IT 
+17 Phase 2 testing, integration testing with Phase 1 modules  HR/IT  
+18 Phase 2 launch, training on new features, documentation update  HR 
+ 
+Table 10: Phase 2 implementation timeline  
+Post -Phase 2: Continuous Improvement  
+• Monthly user feedback sessions  
+• Quarterly feature prioritization reviews  
+• Annual security and compliance audits  
+• Future considerations: Payroll integration, mobile app, AI -powered insights  
+ 
+Data Migration Strategy  
+Pre-Migration Tasks  
+1. Data Audit  (Week 1)  
+• Inventory all existing employee data sources (spreadsheets, physical files, 
+emails)  
+• Identify data quality issues: duplicates, missing fields, format inconsistencies  
+• Establish data ownership and accountability  
+2. Data Cleansing  (Week 2)  
+• Standardize name formats (Title Case)  
+• Validate phone numbers and email addresses  
+• Verify employment dates and status  
+• Confirm Next of Kin and emergency contacts  
+• Scan and digitize physical documents (CVs, contracts, IDs)  
+3. Template Population  (Week 2)  
+• Populate Excel templates with cleansed data  
+• Cross -verify critical fields with source documents  
+• HR sign -off on data accuracy before import  
+Migration Execution  
+Migration Approach: Phased Bulk Import  
+1. Test Migration  (Week 3)  
+• Import 10 sample records (5 Core Staff, 5 Support Staff)  
+• Validate data integrity in portal  
+• Test relationships (Line Manager links, department hierarchies)  
+• Identify and resolve import errors  
+2. Full Migration  (Week 5)  
+• Import all Core Staff records ($ \sim$50 -100 records)  
+• Import all Support Staff records ($ \sim$100 -200 records)  
+• Upload documents to document repository  
+• Verify import completeness (record count, field population)  
+3. Post -Migration Validation  (Week 6)  
+• Spot -check 20% of records for accuracy  
+• Reconcile leave balances with HR records  
+• Test user logins and access permissions  
+• HR final approval on migrated data  
+Rollback Plan:  
+• Database snapshot taken before migration  
+• If $>$10% data errors detected, rollback and repeat cleansing  
+• Post -rollback: Root cause analysis and corrective action  
+ 
+Change Management & User Adoption 
+Strategy  
+Communication Plan  
+Pre-Launch (Weeks 1 -6): 
+• Week 1: All -staff announcement via email (HRIS overview, benefits, timeline)  
+• Week 4: Department briefings by HR (Q&A sessions)  
+• Week 6: Launch countdown communications (daily tips, FAQs)  
+Launch (Week 7):  
+• Launch day event (optional): HR -led walkthrough session  
+• Welcome email with login credentials and quick start guide  
+• WhatsApp support group for real -time assistance  
+Post -Launch (Weeks 8+):  
+• Weekly usage reports shared with Line Managers  
+• Monthly "Feature Spotlight" emails highlighting underused features  
+• Quarterly satisfaction surveys and feedback collection  
+Training Strategy  
+Training Modules by Role:  
+1. Core Staff Training  (45 minutes)  
+• Login and navigation  
+• Viewing personal profile and documents  
+• Applying for leave (step -by-step demo)  
+• Requesting profile corrections  
+• Dashboard overview and notifications  
+2. Line Manager Training  (60 minutes)  
+• All Core Staff functions plus:  
+• Viewing team data  
+• Approving leave requests  
+• Reviewing team leave calendar  
+• Generating team reports  
+3. HR Administrator Training  (90 minutes)  
+• System administration  
+• Adding/editing staff records (Core & Support)  
+• Managing leave balances and overrides  
+• Document uploads and repository management  
+• Running reports and data exports  
+• User management and access control  
+Training Delivery Methods:  
+• In-person sessions (preferred for HR and Line Managers)  
+• Recorded video tutorials (for Core Staff, on -demand access)  
+• Printed quick reference guides (laminated one -pagers)  
+• In-app tooltips and contextual help  
+Adoption Metrics & Monitoring  
+Week 1 Targets:  
+• 80% of Core Staff complete first login  
+• 50% of staff view their profile and documents  
+• Zero critical bugs requiring system downtime  
+Month 1 Targets:  
+• 90% staff login rate  
+• 30+ leave applications submitted and processed  
+• $<$5 support tickets per week  
+• 70% staff satisfaction score (post -survey)  
+Quarter 1 Targets:  
+• 95% active usage (at least one login per month)  
+• 50% reduction in HR email inquiries  
+• Zero data integrity issues  
+• 85% staff satisfaction score  
+ 
+Risk Management  
+Technical Risks  
+Risk  Impact  Mitigation  
+Data migration errors  High: Incorrect 
+employee records  Rigorous testing, phased import, 
+validation checks[2]  
+System downtime during 
+launch  Medium: Delayed 
+adoption  Staging environment testing, off -
+hours deployment  
+Security breach  High: NDPR 
+violations, data loss  Encryption, MFA, regular 
+security audits, penetration 
+testing[5]  
+Poor performance with 
+scale  Medium: Slow 
+response times  Load testing, database indexing, 
+caching strategy  
+Integration failures 
+(email/WhatsApp)  Low: Missed 
+notifications  Fallback to manual notifications, 
+API retry logic  
+ 
+Table 11: Technical risk register  
+Organizational Risks  
+Risk  Impact  Mitigation  
+Low user 
+adoption  High: System 
+underutilization  Change management, training, 
+executive sponsorship[2]  
+Resistance to 
+change  Medium: Continued 
+manual processes  Early involvement, champions 
+program, success stories  
+Scope creep  Medium: Delayed launch  Strict Phase 1 scope, change request 
+process  
+Insufficient HR 
+capacity  Medium: Data quality 
+issues  Dedicated HR resource, temporary 
+support during migration  
+Budget overruns  Low: Project delays  Bootstrap -friendly tech stack, phased 
+delivery[3][4]  
+ 
+Table 12: Organizational risk register  
+ 
+Success Criteria & KPIs  
+Phase 1 Success Metrics  
+Quantitative:  
+• 95% data accuracy post -migration (measured via spot -check audit)  
+• 80% user login rate within Week 1 of launch  
+• Leave approval cycle reduced to $<$48 hours (from current 5 -7 days)  
+• $<$5% support ticket rate per week (tickets per active user)  
+• Zero critical security incidents in first 3 months  
+Qualitative:  
+• HR reports improved efficiency in employee data management  
+• Line Managers express satisfaction with leave approval workflow  
+• Staff report ease of accessing personal records and documents  
+• Executive leadership endorses system for company -wide use  
+Phase 2 Success Metrics  
+Quantitative:  
+• 90% performance review completion rate by Q4 deadline  
+• 75% mandatory training compliance within 30 days of assignment  
+• 100% deployment history accuracy for Support Staff  
+• HR dashboard accessed by HR team $ \geq$3 times per week  
+• $\geq$20 data exports per month (indicating active reporting use)  
+Qualitative:  
+• HR reports time savings of $ \geq$50% in administrative tasks[1]  
+• Performance appraisal process perceived as fairer and more transparent  
+• L&D tracking improves training ROI visibility  
+• Executive decisions increasingly data -driven (using HR reports)  
+ 
+Maintenance & Support Plan  
+Support Structure  
+Tiered Support Model:  
+1. Tier 1: User Self -Service  
+• In-app help documentation and FAQs  
+• Video tutorial library  
+• WhatsApp support group (peer -to-peer)  
+2. Tier 2: HR Help Desk  
+• Email: hris-support@dataguardng.com  
+• Response time: Within 4 hours during business hours (8 AM - 5 PM WAT)  
+• Scope: Account issues, data corrections, how -to queries  
+3. Tier 3: IT Development Team  
+• Email: it-dev@dataguardng.com  
+• Response time: Critical bugs within 2 hours, others within 24 hours  
+• Scope: System errors, bugs, feature requests, technical troubleshooting  
+Maintenance Schedule  
+Regular Maintenance:  
+• Daily : Automated backups, log monitoring  
+• Weekly : Security patch reviews, performance monitoring  
+• Monthly : User access audit, inactive account cleanup, analytics review  
+• Quarterly : Security vulnerability scan, compliance audit, feature prioritization  
+• Annually : Comprehensive system audit, disaster recovery drill, user satisfaction 
+survey  
+System Updates:  
+• Minor updates: Deployed during maintenance window (Sundays 2:00 -4:00 AM 
+WAT)  
+• Major updates: Scheduled quarterly, communicated 2 weeks in advance  
+• Emergency patches: Deployed immediately if critical security issue identified  
+ 
+Compliance & Data Governance  
+Nigeria Data Protection Regulation (NDPR) 
+Compliance  
+Key NDPR Requirements for HRIS:  
+1. Lawful Basis for Processing [5] 
+• Employee consent obtained during onboarding (opt -in for data processing)  
+• Employment contract establishes legitimate interest for data retention  
+• Privacy notice displayed prominently on login page  
+2. Data Subject Rights [5] 
+• Right to access: Staff can view/download their data anytime  
+• Right to rectification: "Request Correction" workflow implemented  
+• Right to erasure: HR can anonymize/delete records upon exit (retention 
+policy: 7 years post -employment)  
+• Right to data portability: Export personal data in machine -readable format 
+(JSON/CSV)  
+3. Data Security Measures [5] 
+• Encryption: AES -256 at rest, TLS 1.3 in transit  
+• Access control: RBAC with principle of least privilege  
+• Audit trails: All access and modifications logged with timestamp  
+• Breach notification: Protocol to report breaches to NITDA within 72 hours  
+4. Data Retention Policy  
+• Active employees: Data retained indefinitely during employment  
+• Exited employees: Records archived for 7 years (Nigeria Labour Act 
+requirement)  
+• Support Staff: Records retained 3 years post -disengagement  
+• Automatic purge: System flags records eligible for deletion; HR approves final 
+deletion  
+Labour Law Compliance  
+Nigeria Labour Act Alignment:  
+• Employment Contracts : Digital storage of signed contracts; alerts for contract 
+renewals[6]  
+• Leave Entitlements : System calculates leave per Labour Act provisions (minimum 
+6 working days annually after 12 months)[6]  
+• Probation Periods : Track probation start/end dates; alert HR 30 days before 
+confirmation due[6]  
+• Termination Records : Document termination reasons and notice periods; comply 
+with severance pay calculations  
+• Audit Readiness : Generate compliance reports for Ministry of Labour inspections  
+ 
+Future Roadmap (Post -Phase 2)  
+Potential Enhancements (12 -24 Months)  
+1. Payroll Integration  
+• API connection to external payroll software (e.g., Workpay, SeamlessHR)  
+• Automated salary data sync for Core Staff  
+• Payslip distribution via portal  
+2. Mobile Application  
+• Native apps for iOS and Android  
+• Push notifications for leave approvals, announcements  
+• Biometric authentication (fingerprint/face ID)  
+3. Advanced Analytics & AI  
+• Predictive analytics: Turnover risk modeling, performance trend forecasting  
+• AI-powered insights: Identify skill gaps, recommend training  
+• Sentiment analysis: Analyze feedback and comments for HR insights  
+4. Recruitment & Onboarding  
+• Applicant tracking system (ATS) integration  
+• Digital onboarding workflows (e -signatures, document submissions)  
+• New hire portal with orientation checklists  
+5. Time & Attendance  
+• Biometric device integration (fingerprint scanners)  
+• Geolocation -based check -in/check -out for Support Staff  
+• Overtime tracking and approval workflows  
+6. Employee Self -Service Expansion  
+• Expense claims and reimbursement requests  
+• Asset management (laptop, phone assignments)  
+• Incident reporting and HR grievance management  
+ 
+Appendix A: Glossary  
+• Core Staff : Permanent and contract employees working at DataGuard office 
+locations with full benefits and self -service access.  
+• Support Staff : Project -based or client -deployed staff (e.g., security guards, janitors) 
+with limited system access; records managed by HR.  
+• HRIS : Human Resource Information System; software for managing HR processes 
+and employee data.  
+• RBAC : Role -Based Access Control; security paradigm restricting system access based 
+on user roles.  
+• NDPR : Nigeria Data Protection Regulation; law governing personal data processing 
+and privacy.  
+• MFA : Multi -Factor Authentication; security mechanism requiring multiple 
+verification methods.  
+• RTO : Recovery Time Objective; maximum acceptable time to restore system after 
+disruption.  
+• RPO : Recovery Point Objective; maximum acceptable data loss measured in time.  
+• WCAG : Web Content Accessibility Guidelines; international standards for web 
+accessibility.  
+ 
+Appendix B: Reference Documents  
+This PRD should be read alongside:  
+1. Excel Data Templates : Core Staff, Support Staff, and Deployment templates 
+(provided by HR, Week 2)  
+2. DataGuard Organizational Chart : Department structure and reporting lines (for 
+Line Manager hierarchy)  
+3. DataGuard HR Policies Handbook : Leave entitlements, performance review 
+cycles, training policies  
+4. NDPR Compliance Guidelines : NITDA official documentation on data protection 
+requirements  
+5. Nigeria Labour Act : Official text for employment law compliance  
+6. DataGuard IT Security Policy : Standards for access control, encryption, and audit 
+logging  
+ 
+Appendix C: Contact Information  
+Role  Name  Email  Phone  
+Product Owner (HR Lead)  [TBD]  hr@dataguardng.com  [TBD]  
+Solution Developer (IT Lead)  [TBD]  it-dev@dataguardng.com  [TBD]  
+Project Sponsor (Management)  [TBD]  management@dataguardng.com  [TBD]  
+ 
+ 
+Document Approval  
+Role  Name  Signature  Date  
+HR Product Owner  ________________  ________________  ________  
+IT Solution 
+Developer  ________________  ________________  ________  
+Executive Sponsor  ________________  ________________  ________  
+ 
+ 
+Revision History  
+Version  Date  Author  Changes  
+1.0 February 13, 2026  [Author Name]  Initial PRD creation  
+    
+    
+ 
+ 
+References  
+[1] Outsail. (2024). Best practices for implementing an HRIS system. 
+https://www.outsail.co/post/best -practices -for-implementing -an-hris-system  
+[2] Workplace Check -In. (2024). 10 best practices for successful HRIS implementation. 
+https://www.workplacecheckin.com/blogs/10 -best -practices -for-successful -hris-
+implementation  
+[3] OnePyramid. (2025). Top 5 HRIS platforms in Nigeria. https://onepyramid.com/top -5-
+hris-platforms -in-nigeria -2025/  
+[4] Tech Economy. (2025). Go -to-market strategies for launching SaaS products in Nigeria. 
+https://techeconomy.ng/go -to-market -strategies -for-launching -saas -products -in-nigeria/  
+[5] Express Global Employment. (2023). Global HR compliance in Nigeria. 
+https://expressglobalemployment.com/countries/global -hr-compliance -in-nigeria/  
+[6] Doheny Services. (2025). Labour law compliance in Nigeria: 2025 guide for employers. 
+https://jobs.doheneyservices.com/blog/labour -law-compliance -in-nigeria -2025 -guide -for-
+employers  

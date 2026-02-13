@@ -1,0 +1,7 @@
+feat: implement auth, profile, docs, and leave management
+
+- Setup Next.js, Tailwind, Shadcn UI
+- Implemented Supabase Auth & RBAC
+- Created Profile Management (Core/Support)
+- Created Document Repository with RLS
+- Created Leave Management System
