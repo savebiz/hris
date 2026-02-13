@@ -1,3 +1,5 @@
+'use server'
+
 import { createClient } from '@/lib/supabase/server'
 import { ProfileFormValues, profileSchema } from '@/lib/schemas/profile'
 import { revalidatePath } from 'next/cache'
@@ -238,8 +240,29 @@ export async function getAdminDashboardStats() {
     return {
         totalEmployees: employeeCount || 0,
         pendingRequests: pendingCount || 0,
+        pendingRequests: pendingCount || 0,
         onLeaveToday: onLeaveCount || 0
     }
+}
+
+export async function getAuditLogs() {
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+        .from('audit_logs')
+        .select(`
+            *,
+            profiles:actor_id (full_name, email, role)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(50)
+
+    if (error) {
+        console.error("Error fetching logs:", error)
+        return []
+    }
+
+    return data
 }
 
 

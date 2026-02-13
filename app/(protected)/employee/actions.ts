@@ -1,3 +1,5 @@
+'use server'
+
 import { createClient } from '@/lib/supabase/server'
 import { LeaveFormValues, leaveSchema } from '@/lib/schemas/leave'
 import { revalidatePath } from 'next/cache'

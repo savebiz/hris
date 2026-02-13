@@ -1,0 +1,4 @@
+fix: build errors, restore 'use server' directives
+
+- Added missing 'use server' to admin/actions.ts and employee/actions.ts.
+- Restored getAuditLogs function in admin/actions.ts.
