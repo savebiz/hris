@@ -1,0 +1,5 @@
+fix: update supabase server client for next.js 15
+
+- Updated createClient to be async and await cookies()
+- Updated all call sites to await createClient()
+- Fixes Vercel build error "Property 'get' does not exist on type Promise"

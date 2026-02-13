@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/server'
 import { AuthError } from '@supabase/supabase-js'
 
 export async function login(formData: FormData) {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const email = formData.get('email') as string
     const password = formData.get('password') as string

@@ -5,7 +5,7 @@ import { LeaveFormValues, leaveSchema } from '@/lib/schemas/leave'
 import { revalidatePath } from 'next/cache'
 
 export async function submitLeaveRequest(data: LeaveFormValues) {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Validate data
     const result = leaveSchema.safeParse(data)

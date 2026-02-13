@@ -5,7 +5,7 @@ import { ProfileFormValues, profileSchema } from '@/lib/schemas/profile'
 import { revalidatePath } from 'next/cache'
 
 export async function createStaffAction(data: ProfileFormValues) {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // 1. Create Auth User (In a real app, you might use the Admin API to invite users)
     // For Phase 1, we might assume the user already exists or we are just creating the profile record 
@@ -16,7 +16,7 @@ export async function createStaffAction(data: ProfileFormValues) {
     // However, `profiles` table references `auth.users`. 
     // *Strategy*: We will usage Supabase Admin API to `inviteUserByEmail` which creates the auth record.
 
-    const supabaseAdmin = createClient() // Ideally needs SERVICE_ROLE_KEY for admin actions, 
+    const supabaseAdmin = await createClient() // Ideally needs SERVICE_ROLE_KEY for admin actions, 
     // but for now we will stick to the plan where HR creates "Profiles" and we might need a workaround 
     // if we don't have the Service Role Key in .env.local yet.
     // 
