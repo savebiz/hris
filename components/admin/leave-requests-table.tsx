@@ -15,6 +15,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { approveLeaveRequest, rejectLeaveRequest } from "@/app/(protected)/admin/actions"
 import { useTransition } from "react"
 import { toast } from "@/hooks/use-toast"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { useState } from "react"
 
 function calculateDuration(startDate: string, endDate: string) {
     try {
@@ -66,23 +77,23 @@ interface LeaveRequestsTableProps {
 
 export function LeaveRequestsTable({ data }: LeaveRequestsTableProps) {
     const [isPending, startTransition] = useTransition()
+    const [confirmAction, setConfirmAction] = useState<{ id: string, type: 'approve' | 'reject' } | null>(null)
 
-    const handleApprove = (id: string) => {
-        startTransition(async () => {
-            const result = await approveLeaveRequest(id)
-            if (result.error) {
-                // simple alert or toast if configured
-                alert(`Error approving leave: ${result.error}`)
-            }
-        })
-    }
+    const handleAction = () => {
+        if (!confirmAction) return
 
-    const handleReject = (id: string) => {
         startTransition(async () => {
-            const result = await rejectLeaveRequest(id)
-            if (result.error) {
-                alert(`Error declining leave: ${result.error}`)
+            let result
+            if (confirmAction.type === 'approve') {
+                result = await approveLeaveRequest(confirmAction.id)
+            } else {
+                result = await rejectLeaveRequest(confirmAction.id)
             }
+
+            if (result.error) {
+                alert(`Error ${confirmAction.type === 'approve' ? 'approving' : 'declining'} leave: ${result.error}`)
+            }
+            setConfirmAction(null)
         })
     }
 
@@ -140,10 +151,10 @@ export function LeaveRequestsTable({ data }: LeaveRequestsTableProps) {
                         <TableCell className="text-right">
                             {request.status === 'pending' && (
                                 <div className="flex justify-end gap-2">
-                                    <Button size="icon" variant="outline" className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50" onClick={() => handleApprove(request.id)} disabled={isPending}>
+                                    <Button size="icon" variant="outline" className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50" onClick={() => setConfirmAction({ id: request.id, type: 'approve' })} disabled={isPending}>
                                         <Check className="h-4 w-4" />
                                     </Button>
-                                    <Button size="icon" variant="outline" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleReject(request.id)} disabled={isPending}>
+                                    <Button size="icon" variant="outline" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => setConfirmAction({ id: request.id, type: 'reject' })} disabled={isPending}>
                                         <X className="h-4 w-4" />
                                     </Button>
                                 </div>
@@ -152,6 +163,25 @@ export function LeaveRequestsTable({ data }: LeaveRequestsTableProps) {
                     </TableRow>
                 ))}
             </TableBody>
+            <AlertDialog open={!!confirmAction} onOpenChange={(open) => !open && setConfirmAction(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. You are about to <strong>{confirmAction?.type === 'approve' ? 'approve' : 'decline'}</strong> this leave request.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleAction}
+                            className={confirmAction?.type === 'approve' ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
+                        >
+                            {confirmAction?.type === 'approve' ? 'Approve' : 'Decline'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </Table>
     )
 }

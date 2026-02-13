@@ -1,0 +1,5 @@
+feat: add confirmation dialog for leave actions
+
+- Installed @radix-ui/react-alert-dialog.
+- Added Shadcn UI AlertDialog component.
+- Implemented confirmation modal for Approve/Decline actions in Admin Leave Table.
