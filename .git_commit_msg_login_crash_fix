@@ -1,0 +1,5 @@
+fix: handle login page params with suspense
+
+- Update LoginForm to read 'message' from searchParams and display it
+- Wrap LoginForm in Suspense boundary in LoginPage
+- Fixes client-side exception when redirecting to login with query params

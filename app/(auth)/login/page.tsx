@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
+import { Suspense } from "react"
 
 import { SplitLayout } from "@/components/shared/split-layout"
 import { LoginForm } from "@/components/forms/login-form"
@@ -26,7 +27,9 @@ export default function LoginPage() {
                         Enter your email below to login to your account
                     </p>
                 </div>
-                <LoginForm />
+                <Suspense fallback={<div>Loading...</div>}>
+                    <LoginForm />
+                </Suspense>
                 <p className="px-8 text-center text-sm text-muted-foreground">
                     <Link href="/signup" className="hover:text-primary underline underline-offset-4">
                         Don&apos;t have an account? Sign Up
