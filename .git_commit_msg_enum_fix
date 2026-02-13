@@ -1,4 +1,4 @@
-fix: correct zod enum syntax
+fix: use correct leave status enum 'declined'
 
-- Removed invalid { required_error } argument from z.enum() in leave schema
-- Fixes Vercel build type error
+- Updated rejectLeaveRequest to set status to 'declined' matching DB schema.
+- Updated UI to handle 'declined' status for badges and types.

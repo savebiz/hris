@@ -137,9 +137,16 @@ export async function approveLeaveRequest(id: string) {
 
 export async function rejectLeaveRequest(id: string) {
     const supabase = await createClient()
+    const user = (await supabase.auth.getUser()).data.user
+    if (!user) return { error: "Unauthorized" }
+
     const { error } = await supabase
         .from('leave_requests')
-        .update({ status: 'rejected', approved_at: new Date().toISOString() }) // capture decision time
+        .update({
+            status: 'declined',
+            approved_at: new Date().toISOString(),
+            approved_by: user.id
+        }) // capture decision time
         .eq('id', id)
 
     if (error) return { error: error.message }

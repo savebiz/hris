@@ -52,7 +52,7 @@ interface LeaveRequest {
     start_date: string
     end_date: string
     reason: string | null
-    status: 'pending' | 'approved' | 'rejected'
+    status: 'pending' | 'approved' | 'declined'
     profiles?: {
         full_name: string | null
         avatar_url: string | null
@@ -81,7 +81,7 @@ export function LeaveRequestsTable({ data }: LeaveRequestsTableProps) {
         startTransition(async () => {
             const result = await rejectLeaveRequest(id)
             if (result.error) {
-                alert(`Error rejecting leave: ${result.error}`)
+                alert(`Error declining leave: ${result.error}`)
             }
         })
     }
@@ -131,7 +131,7 @@ export function LeaveRequestsTable({ data }: LeaveRequestsTableProps) {
                         <TableCell>
                             <Badge variant={
                                 request.status === 'approved' ? "success" :
-                                    request.status === 'rejected' ? "destructive" :
+                                    request.status === 'declined' ? "destructive" :
                                         "warning"
                             }>
                                 {request.status}
