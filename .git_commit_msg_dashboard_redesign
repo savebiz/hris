@@ -1,0 +1,7 @@
+feat: modernize employee dashboard design
+
+- Implemented premium UI with gradient banner and personalized greeting.
+- Added detailed leave balance cards with progress bars.
+- Added recent activity feed.
+- Improved quick actions layout.
+- Integrated real-time data fetching for profile and balances.
