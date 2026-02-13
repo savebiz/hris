@@ -1,0 +1,4 @@
+feat: add landing page
+
+- Replace default Next.js page with DataGuard HRIS landing page
+- Add links to Login page
