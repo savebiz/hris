@@ -1,0 +1,4 @@
+fix: correct zod enum syntax
+
+- Removed invalid { required_error } argument from z.enum() in leave schema
+- Fixes Vercel build type error
