@@ -172,16 +172,18 @@ export async function getUserDocuments(userId: string) {
         return []
     }
 
-    // Filter out potential folder placeholders or empty objects if necessary
-    // Supabase storage list might return the folder itself if not careful, but typically it returns contents.
-    // If ".emptyFolderPlaceholder" exists, filter it out.
-    // Also ensuring clean return.
-    return data.filter(item => item.name !== '.emptyFolderPlaceholder')
+    // Filter out potential folder placeholders or empty objects
+    // Debug logging
+    console.log(`[getUserDocuments] Raw data for ${userId}:`, JSON.stringify(data, null, 2))
+
+    return data.filter(item => item.name !== '.emptyFolderPlaceholder' && item.metadata)
 }
 
 export async function getDocumentUrl(path: string) {
     const supabase = await createClient()
 
+    // Create a signed URL. By default, Supabase might set Content-Disposition to download.
+    // For "viewing", we usually just want the URL.
     const { data, error } = await supabase
         .storage
         .from('confidential-docs')

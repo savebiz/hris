@@ -1,0 +1,6 @@
+fix: document portal view and metadata
+
+- Added 'View' option to open documents in new tab.
+- Fixed NaN size issue by safely accessing metadata.
+- Improved date formatting fallback.
+- Added usage of Safe Metadata Access pattern in UI.
