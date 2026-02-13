@@ -118,9 +118,16 @@ export async function getLeaveRequests() {
 
 export async function approveLeaveRequest(id: string) {
     const supabase = await createClient()
+    const user = (await supabase.auth.getUser()).data.user
+    if (!user) return { error: "Unauthorized" }
+
     const { error } = await supabase
         .from('leave_requests')
-        .update({ status: 'approved', approved_at: new Date().toISOString() })
+        .update({
+            status: 'approved',
+            approved_at: new Date().toISOString(),
+            approved_by: user.id
+        })
         .eq('id', id)
 
     if (error) return { error: error.message }

@@ -72,7 +72,7 @@ export function LeaveRequestsTable({ data }: LeaveRequestsTableProps) {
             const result = await approveLeaveRequest(id)
             if (result.error) {
                 // simple alert or toast if configured
-                alert("Error approving leave")
+                alert(`Error approving leave: ${result.error}`)
             }
         })
     }
@@ -81,7 +81,7 @@ export function LeaveRequestsTable({ data }: LeaveRequestsTableProps) {
         startTransition(async () => {
             const result = await rejectLeaveRequest(id)
             if (result.error) {
-                alert("Error rejecting leave")
+                alert(`Error rejecting leave: ${result.error}`)
             }
         })
     }

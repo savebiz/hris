@@ -1,0 +1,5 @@
+fix: resolve leave approval error and add balance deduction
+
+- Created SQL migration to add 'approved_at' column and balance deduction trigger.
+- Updated approveLeaveRequest to set 'approved_by' and 'approved_at'.
+- Improved error handling in UI to show specific error messages.
