@@ -1,0 +1,5 @@
+feat: unrestrict employee document viewing
+
+- Enabled 'View' button in employee document portal.
+- Implemented secure getDocumentUrl action checking user ownership.
+- Updated DocumentManager to handle viewing logic and safe metadata display.

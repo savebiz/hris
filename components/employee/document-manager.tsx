@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition, useRef } from "react"
-import { uploadEmployeeDocument } from "@/app/(protected)/employee/actions"
+import { uploadEmployeeDocument, getDocumentUrl } from "@/app/(protected)/employee/actions"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,9 +10,10 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface DocumentManagerProps {
     initialDocuments: any[]
+    userId: string
 }
 
-export function DocumentManager({ initialDocuments }: DocumentManagerProps) {
+export function DocumentManager({ initialDocuments, userId }: DocumentManagerProps) {
     const [isPending, startTransition] = useTransition()
     const [uploadStatus, setUploadStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null)
     const formRef = useRef<HTMLFormElement>(null)
@@ -28,6 +29,32 @@ export function DocumentManager({ initialDocuments }: DocumentManagerProps) {
                 formRef.current?.reset()
             }
         })
+    }
+
+    const handleView = async (fileName: string, userId: string) => {
+        // userId is embedded in the path logic in the server action, 
+        // but for the client we need to construct the path IF the action expects a full path.
+        // Wait, the action `getDocumentUrl` in `employee/actions.ts` expects `path`.
+        // The file name in `initialDocuments` is just the name. 
+        // The path in storage is `userId/filename`.
+        // BUT `initialDocuments` returned by `list(userId)` usually has `name` as just the filename.
+        // We need the user ID to construct the path. 
+        // `initialDocuments` doesn't strictly have the userId in the file object locally unless we pass it.
+        // However, the `getDocumentUrl` action gets the current user from auth(), 
+        // so we just need to pass the path relative to the bucket or fully qualified?
+        // `storage.from(...).createSignedUrl(path)` expects the path inside the bucket.
+        // Since we organize by `userId/filename`, we need to know the userId.
+        // We can pass `userId` as prop to `DocumentManager` OR better, 
+        // since `getDocumentUrl` checks `auth.uid()`, maybe we can just pass the filename and let the server prepend it?
+        // NO, the server action `getDocumentUrl(path)` checks `if (!path.startsWith(user.id))`. 
+        // So the CLIENT must send `userId/filename`.
+        // We need to pass `userId` to `DocumentManager`.
+        // I'll update the component to accept `userId`.
+        //
+        // Wait, let's look at `getDocumentUrl` implementation again.
+        // It checks `!path.startsWith(user.id)`.
+        // So I need to send `${user.id}/${fileName}`.
+        // I need `userId` in props.
     }
 
     return (
@@ -88,14 +115,23 @@ export function DocumentManager({ initialDocuments }: DocumentManagerProps) {
                                             <FileText className="h-5 w-5 text-blue-600" />
                                         </div>
                                         <div>
-                                            <p className="font-medium text-sm truncate max-w-[200px] sm:max-w-md">{doc.name.split('_').slice(1).join('_')}</p>
+                                            <p className="font-medium text-sm truncate max-w-[200px] sm:max-w-md">
+                                                {doc.name.includes('_') && /^\d+$/.test(doc.name.split('_')[0])
+                                                    ? doc.name.split('_').slice(1).join('_')
+                                                    : doc.name}
+                                            </p>
                                             <p className="text-xs text-muted-foreground">
-                                                {new Date(doc.created_at).toLocaleDateString()} • {(doc.metadata?.size / 1024).toFixed(1)} KB
+                                                {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : 'Unknown'} • {doc.metadata ? (doc.metadata.size / 1024).toFixed(1) : 0} KB
                                             </p>
                                         </div>
                                     </div>
-                                    <Button variant="ghost" size="sm" disabled>
-                                        View (Restricted)
+                                    <Button variant="ghost" size="sm" onClick={async () => {
+                                        const path = `${userId}/${doc.name}`
+                                        const url = await getDocumentUrl(path)
+                                        if (url) window.open(url, '_blank')
+                                        else alert("Failed to open document")
+                                    }}>
+                                        View
                                     </Button>
                                 </div>
                             ))}

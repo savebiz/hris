@@ -90,3 +90,27 @@ export async function getMyDocuments() {
 
     return data
 }
+
+export async function getDocumentUrl(path: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    // Security check: ensure the path starts with the user's ID
+    if (!path.startsWith(user.id)) {
+        console.error("Unauthorized access attempt to document:", path)
+        return null
+    }
+
+    const { data, error } = await supabase
+        .storage
+        .from('confidential-docs')
+        .createSignedUrl(path, 60 * 60) // 1 hour
+
+    if (error) {
+        console.error("Error creating signed URL:", error)
+        return null
+    }
+
+    return data.signedUrl
+}
