@@ -1,0 +1,6 @@
+fix: enhance admin document portal
+
+- Fixed NaN size and invalid date display in document list.
+- Modernized UserDocumentsList with avatars and action dropdowns.
+- Updated DocumentsUserList with directory-style layout.
+- Added filtering to getUserDocuments to exclude placeholders.

@@ -172,7 +172,11 @@ export async function getUserDocuments(userId: string) {
         return []
     }
 
-    return data
+    // Filter out potential folder placeholders or empty objects if necessary
+    // Supabase storage list might return the folder itself if not careful, but typically it returns contents.
+    // If ".emptyFolderPlaceholder" exists, filter it out.
+    // Also ensuring clean return.
+    return data.filter(item => item.name !== '.emptyFolderPlaceholder')
 }
 
 export async function getDocumentUrl(path: string) {
