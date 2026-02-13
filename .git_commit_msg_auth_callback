@@ -1,0 +1,5 @@
+feat: add auth callback and fix redirect
+
+- Created /auth/callback route to handle email confirmation codes
+- Updated signup action to set emailRedirectTo dynamically
+- Fixes issue where confirmation links redirected to localhost
