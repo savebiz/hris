@@ -51,14 +51,20 @@ export default async function LeaveManagementPage() {
         )
     }
 
-    const leaves = await getLeaveRequests()
-    const pendingCount = leaves.filter((l: any) => l.status === 'pending').length
+    const { data: leaves, error } = await getLeaveRequests()
+    const pendingCount = leaves?.filter((l: any) => l.status === 'pending').length || 0
 
     return (
         <div className="flex-1 space-y-4 p-8 pt-6">
             <div className="flex items-center justify-between space-y-2">
                 <h2 className="text-3xl font-bold tracking-tight">Leave Management</h2>
             </div>
+
+            {error && (
+                <div className="bg-destructive/15 p-3 rounded-md text-destructive text-sm font-medium">
+                    Error fetching leaves: {error}
+                </div>
+            )}
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
@@ -80,7 +86,7 @@ export default async function LeaveManagementPage() {
                 </CardHeader>
                 <CardContent>
                     <Suspense fallback={<div>Loading requests...</div>}>
-                        <LeaveRequestsTable data={leaves} />
+                        <LeaveRequestsTable data={leaves || []} />
                     </Suspense>
                 </CardContent>
             </Card>

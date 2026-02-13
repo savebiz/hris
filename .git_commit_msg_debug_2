@@ -1,0 +1,4 @@
+fix: expose db errors in admin leave page
+
+- Refactored getLeaveRequests to return { data, error } structure.
+- Added error message display to Admin Leave Page to debug "No requests found" issue.

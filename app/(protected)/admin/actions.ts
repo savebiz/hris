@@ -83,10 +83,10 @@ export async function getLeaveRequests() {
 
     if (error) {
         console.error("Error fetching leaves:", error)
-        return []
+        return { data: [], error: error.message }
     }
 
-    return leaves
+    return { data: leaves, error: null }
 }
 
 export async function approveLeaveRequest(id: string) {
