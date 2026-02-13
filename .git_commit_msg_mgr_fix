@@ -1,0 +1,4 @@
+fix: manager role redirection and sidebar links
+
+- Updated middleware to redirect line_manager to /manager/dashboard.
+- Updated Sidebar and MobileSidebar to link to correct dashboard for managers.

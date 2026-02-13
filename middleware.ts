@@ -91,6 +91,8 @@ export async function middleware(request: NextRequest) {
         if (isAuthRoute) {
             if (role === 'hr_admin') {
                 return NextResponse.redirect(new URL('/admin/dashboard', request.url))
+            } else if (role === 'line_manager') {
+                return NextResponse.redirect(new URL('/manager/dashboard', request.url))
             } else {
                 return NextResponse.redirect(new URL('/employee/dashboard', request.url))
             }
@@ -100,6 +102,8 @@ export async function middleware(request: NextRequest) {
         if (request.nextUrl.pathname === '/') {
             if (role === 'hr_admin') {
                 return NextResponse.redirect(new URL('/admin/dashboard', request.url))
+            } else if (role === 'line_manager') {
+                return NextResponse.redirect(new URL('/manager/dashboard', request.url))
             } else {
                 return NextResponse.redirect(new URL('/employee/dashboard', request.url))
             }
