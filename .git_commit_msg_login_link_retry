@@ -1,0 +1,4 @@
+fix: retry adding signup link to login page
+
+- Force update of login page to include signup link
+- Previous partial update failed, overwriting file
