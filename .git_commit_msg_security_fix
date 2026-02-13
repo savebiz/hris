@@ -1,0 +1,4 @@
+fix: secure database function search_path
+
+- Updated deduct_leave_balance function to explicit set search_path=public.
+- Resolves Supabase Security Advisor warning for mutable search path.
