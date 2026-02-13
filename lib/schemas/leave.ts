@@ -1,9 +1,7 @@
 import * as z from "zod"
 
 export const leaveSchema = z.object({
-    leave_type: z.enum(['Annual', 'Sick', 'Casual', 'Maternity', 'Paternity', 'Unpaid'], {
-        required_error: "Please select a leave type.",
-    }),
+    leave_type: z.enum(['Annual', 'Sick', 'Casual', 'Maternity', 'Paternity', 'Unpaid']),
     start_date: z.string().refine((date) => new Date(date).toString() !== 'Invalid Date', {
         message: "A valid start date is required.",
     }),

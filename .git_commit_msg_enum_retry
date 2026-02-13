@@ -1,0 +1,4 @@
+fix: retry zod enum syntax correction
+
+- Force update of leave schema to remove invalid enum options
+- Fixes persistent Vercel build error
