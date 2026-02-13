@@ -1,0 +1,5 @@
+feat: add signup page for testing
+
+- Added Signup Page and Form component
+- Updated auth actions to support user registration
+- Allows initial user creation for easy access to the system
