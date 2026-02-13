@@ -44,3 +44,111 @@ export async function createStaffAction(data: ProfileFormValues) {
 
     return { success: true, message: "Staff profile logic ready. (Requires Admin Invite integration)" }
 }
+
+export async function getStaffList() {
+    const supabase = await createClient()
+
+    // Fetch profiles from public table
+    // In a real app we might join with auth.users using admin API if needed, 
+    // but typically profiles table has the display info.
+    const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error("Error fetching staff:", error)
+        return []
+    }
+
+    return profiles
+}
+
+export async function getLeaveRequests() {
+    const supabase = await createClient()
+
+    // Fetch all leave requests. 
+    // Join with profiles to get the requester's name.
+    // Explicitly casting or checking relation might be needed if foreign key name varies.
+    // Assuming 'profiles' is the table and 'user_id' is the FK.
+    // Note: If no FK constraint exists, we might just get user_id and have to fetch profiles separately. 
+    // Let's try the join first.
+    const { data: leaves, error } = await supabase
+        .from('leave_requests')
+        .select(`
+            *,
+            profiles:user_id (full_name, avatar_url, job_title)
+        `)
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error("Error fetching leaves:", error)
+        return []
+    }
+
+    return leaves
+}
+
+export async function approveLeaveRequest(id: string) {
+    const supabase = await createClient()
+    const { error } = await supabase
+        .from('leave_requests')
+        .update({ status: 'approved', approved_at: new Date().toISOString() })
+        .eq('id', id)
+
+    if (error) return { error: error.message }
+    revalidatePath('/admin/leaves')
+    return { success: true }
+}
+
+export async function rejectLeaveRequest(id: string) {
+    const supabase = await createClient()
+    const { error } = await supabase
+        .from('leave_requests')
+        .update({ status: 'rejected', approved_at: new Date().toISOString() }) // capture decision time
+        .eq('id', id)
+
+    if (error) return { error: error.message }
+    revalidatePath('/admin/leaves')
+    return { success: true }
+}
+
+export async function getUserDocuments(userId: string) {
+    const supabase = await createClient()
+
+    // List files in the user's folder
+    const { data, error } = await supabase
+        .storage
+        .from('confidential-docs')
+        .list(userId, {
+            limit: 100,
+            offset: 0,
+            sortBy: { column: 'created_at', order: 'desc' },
+        })
+
+    if (error) {
+        console.error("Error fetching documents:", error)
+        return []
+    }
+
+    return data
+}
+
+export async function getDocumentUrl(path: string) {
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+        .storage
+        .from('confidential-docs')
+        .createSignedUrl(path, 60 * 60) // 1 hour expiry
+
+    if (error) {
+        console.error("Error creating signed URL:", error)
+        return null
+    }
+
+    return data.signedUrl
+}
+
+
+

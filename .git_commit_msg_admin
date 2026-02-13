@@ -1,0 +1,7 @@
+feat: implement admin portal features
+
+- Added Staff Management (List & Details)
+- Implemented Leave Management with Approval Workflow
+- Created Document Repository for Admin View
+- Added server actions for fetching staff, leaves, and documents
+- Built Admin UI components (StaffTable, LeaveRequestsTable, UserDocumentsList)
