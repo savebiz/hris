@@ -1,0 +1,6 @@
+feat: implement employee document portal
+
+- Created Documents page for employees with upload and list functionality.
+- Added server actions for secure document upload and retrieval.
+- Updated Dashboard to display real-time document count and link to the portal.
+- Implemented file size and type validation for uploads.

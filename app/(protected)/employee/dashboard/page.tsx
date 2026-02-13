@@ -21,10 +21,11 @@ export default async function EmployeeDashboardPage() {
     }
 
     // Parallel fetching for performance
-    const [profileReq, balanceReq, recentLeavesReq] = await Promise.all([
+    const [profileReq, balanceReq, recentLeavesReq, docsReq] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
         supabase.from('leave_balances').select('*').eq('user_id', user.id).single(),
-        supabase.from('leave_requests').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5)
+        supabase.from('leave_requests').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
+        supabase.storage.from('confidential-docs').list(user.id)
     ])
 
     const profile = profileReq.data
@@ -34,6 +35,7 @@ export default async function EmployeeDashboardPage() {
         casual_total: 5, casual_used: 0
     } // Fallback if no record
     const recentLeaves = recentLeavesReq.data || []
+    const docCount = docsReq.data?.length || 0
 
     // Time greeting
     const hour = new Date().getHours()
@@ -127,8 +129,8 @@ export default async function EmployeeDashboardPage() {
                                     <div key={leave.id} className="flex items-center justify-between border-b last:border-0 pb-4 last:pb-0">
                                         <div className="flex items-center gap-4">
                                             <div className={`p-2 rounded-full ${leave.leave_type === 'Sick' ? 'bg-purple-100 text-purple-600' :
-                                                    leave.leave_type === 'Annual' ? 'bg-blue-100 text-blue-600' :
-                                                        'bg-orange-100 text-orange-600'
+                                                leave.leave_type === 'Annual' ? 'bg-blue-100 text-blue-600' :
+                                                    'bg-orange-100 text-orange-600'
                                                 }`}>
                                                 <Calendar className="h-4 w-4" />
                                             </div>
@@ -173,15 +175,18 @@ export default async function EmployeeDashboardPage() {
                             </Button>
                         </Link>
 
-                        <Button variant="outline" className="w-full h-16 justify-start gap-4 hover:border-emerald-500 hover:bg-emerald-50 transition-all group" disabled>
-                            <div className="bg-emerald-100 p-2 rounded-lg group-hover:bg-emerald-200 transition-colors">
-                                <Upload className="h-5 w-5 text-emerald-700" />
-                            </div>
-                            <div className="flex flex-col items-start">
-                                <span className="font-semibold text-slate-700">Upload Documents</span>
-                                <span className="text-xs text-muted-foreground">Payslips & Contracts (Soon)</span>
-                            </div>
-                        </Button>
+                        <Link href="/employee/documents">
+                            <Button variant="outline" className="w-full h-16 justify-start gap-4 hover:border-emerald-500 hover:bg-emerald-50 transition-all group">
+                                <div className="bg-emerald-100 p-2 rounded-lg group-hover:bg-emerald-200 transition-colors">
+                                    <Upload className="h-5 w-5 text-emerald-700" />
+                                </div>
+                                <div className="flex flex-col items-start">
+                                    <span className="font-semibold text-slate-700">Upload Documents</span>
+                                    <span className="text-xs text-muted-foreground">{docCount} files uploaded</span>
+                                </div>
+                                <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground group-hover:text-emerald-500" />
+                            </Button>
+                        </Link>
 
                         <Button variant="outline" className="w-full h-16 justify-start gap-4 hover:border-violet-500 hover:bg-violet-50 transition-all group" disabled>
                             <div className="bg-violet-100 p-2 rounded-lg group-hover:bg-violet-200 transition-colors">

@@ -35,3 +35,58 @@ export async function submitLeaveRequest(data: LeaveFormValues) {
     revalidatePath('/employee/leaves')
     return { success: true, message: "Leave request submitted successfully" }
 }
+
+export async function uploadEmployeeDocument(formData: FormData) {
+    const supabase = await createClient()
+
+    const file = formData.get('file') as File
+    if (!file) {
+        return { error: "No file provided" }
+    }
+
+    // specific check for file size (e.g. 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        return { error: "File size exceeds 5MB limit" }
+    }
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "Unauthorized" }
+
+    const filePath = `${user.id}/${Date.now()}_${file.name}`
+
+    const { error } = await supabase
+        .storage
+        .from('confidential-docs')
+        .upload(filePath, file)
+
+    if (error) {
+        console.error("Upload Error:", error)
+        return { error: "Failed to upload document" }
+    }
+
+    revalidatePath('/employee/documents')
+    revalidatePath('/employee/dashboard')
+    return { success: true, message: "Document uploaded successfully" }
+}
+
+export async function getMyDocuments() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+
+    const { data, error } = await supabase
+        .storage
+        .from('confidential-docs')
+        .list(user.id, {
+            limit: 100,
+            offset: 0,
+            sortBy: { column: 'created_at', order: 'desc' },
+        })
+
+    if (error) {
+        console.error("Error fetching documents:", error)
+        return []
+    }
+
+    return data
+}
