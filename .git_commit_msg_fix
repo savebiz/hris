@@ -1,0 +1,5 @@
+fix: add missing lib/utils and dependencies
+
+- Created lib/utils.ts with cn() helper
+- Installed clsx and tailwind-merge
+- Fixes Vercel build error "Can't resolve @/lib/utils"
