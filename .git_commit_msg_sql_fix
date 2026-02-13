@@ -1,0 +1,4 @@
+fix: remove non-existent column from leave query
+
+- Removed 'job_title' from getLeaveRequests select query as it does not exist on 'profiles' table.
+- Updated UI to temporarily hide job title display to prevent errors.

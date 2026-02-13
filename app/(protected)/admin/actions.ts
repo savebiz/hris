@@ -77,7 +77,7 @@ export async function getLeaveRequests() {
         .from('leave_requests')
         .select(`
             *,
-            profiles:user_id (full_name, avatar_url, job_title)
+            profiles:user_id (full_name, avatar_url)
         `)
         .order('created_at', { ascending: false })
 

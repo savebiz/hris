@@ -84,7 +84,7 @@ export function LeaveRequestsTable({ data }: LeaveRequestsTableProps) {
                                 </Avatar>
                                 <div className="flex flex-col">
                                     <span className="font-medium text-sm">{request.profiles?.full_name || "Unknown"}</span>
-                                    <span className="text-xs text-muted-foreground">{request.profiles?.job_title}</span>
+                                    {/* <span className="text-xs text-muted-foreground">{request.profiles?.job_title}</span> */}
                                 </div>
                             </div>
                         </TableCell>
