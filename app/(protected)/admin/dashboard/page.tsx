@@ -85,29 +85,18 @@ export default async function AdminDashboardPage() {
                         <CardDescription>Manage staff and operations</CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-4 sm:grid-cols-2">
-                        <Link href="#">
-                            {/* Note: In previous step the form was embedded. We haven't created a standalone 'new staff' page yet. 
-                                 Ideally we should move the form to /admin/staff/new or keep it here in a modal. 
-                                 For now, let's link to the Staff Management page where they can likely add staff (or we add a button there).
-                                 Actually, let's assume we want to link to a 'New Staff' page.
-                                 Since we don't have it, I'll link to # or make a modal later? 
-                                 Wait, user wants MODERNIZE. I should probably move that big form to a dedicated page or keep it in a nicer way.
-                                 Best practice: 'Staff Management' page has an 'Add Staff' button.
-                                 I'll link 'Manage Staff' to /admin/staff.
-                             */}
-                            <Button variant="outline" className="w-full h-20 justify-start gap-4 hover:bg-blue-50 hover:border-blue-200 transition-all group" asChild>
-                                <Link href="/admin/staff">
-                                    <div className="bg-blue-100 p-2 rounded-full group-hover:bg-blue-200 transition-colors">
-                                        <Users className="h-5 w-5 text-blue-700" />
-                                    </div>
-                                    <div className="text-left">
-                                        <span className="block font-semibold text-slate-700">Manage Staff</span>
-                                        <span className="text-xs text-muted-foreground">View & edit profiles</span>
-                                    </div>
-                                    <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground group-hover:text-blue-500" />
-                                </Link>
-                            </Button>
-                        </Link>
+                        <Button variant="outline" className="w-full h-20 justify-start gap-4 hover:bg-blue-50 hover:border-blue-200 transition-all group" asChild>
+                            <Link href="/admin/staff">
+                                <div className="bg-blue-100 p-2 rounded-full group-hover:bg-blue-200 transition-colors">
+                                    <Users className="h-5 w-5 text-blue-700" />
+                                </div>
+                                <div className="text-left">
+                                    <span className="block font-semibold text-slate-700">Manage Staff</span>
+                                    <span className="text-xs text-muted-foreground">View & edit profiles</span>
+                                </div>
+                                <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground group-hover:text-blue-500" />
+                            </Link>
+                        </Button>
 
                         <Button variant="outline" className="w-full h-20 justify-start gap-4 hover:bg-orange-50 hover:border-orange-200 transition-all group" asChild>
                             <Link href="/admin/leaves">
@@ -129,21 +118,23 @@ export default async function AdminDashboardPage() {
                                 </div>
                                 <div className="text-left">
                                     <span className="block font-semibold text-slate-700">Documents</span>
-                                    <span className="text-xs text-muted-foreground">Company files (Soon)</span>
+                                    <span className="text-xs text-muted-foreground">Company files</span>
                                 </div>
                                 <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground group-hover:text-emerald-500" />
                             </Link>
                         </Button>
 
-                        <Button variant="outline" className="w-full h-20 justify-start gap-4 hover:bg-violet-50 hover:border-violet-200 transition-all group">
-                            {/* Placeholder for future feature */}
-                            <div className="bg-violet-100 p-2 rounded-full group-hover:bg-violet-200 transition-colors">
-                                <Activity className="h-5 w-5 text-violet-700" />
-                            </div>
-                            <div className="text-left">
-                                <span className="block font-semibold text-slate-700">Audit Logs</span>
-                                <span className="text-xs text-muted-foreground">View system activity</span>
-                            </div>
+                        <Button variant="outline" className="w-full h-20 justify-start gap-4 hover:bg-violet-50 hover:border-violet-200 transition-all group" asChild>
+                            <Link href="/admin/audit">
+                                <div className="bg-violet-100 p-2 rounded-full group-hover:bg-violet-200 transition-colors">
+                                    <Activity className="h-5 w-5 text-violet-700" />
+                                </div>
+                                <div className="text-left">
+                                    <span className="block font-semibold text-slate-700">Audit Logs</span>
+                                    <span className="text-xs text-muted-foreground">View system activity</span>
+                                </div>
+                                <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground group-hover:text-violet-500" />
+                            </Link>
                         </Button>
                     </CardContent>
                 </Card>
