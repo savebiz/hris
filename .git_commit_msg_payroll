@@ -1,0 +1,6 @@
+feat: implement Payroll Portal (Phase 10)
+
+- Added payroll_records schema and Payslip storage bucket.
+- Created Admin Upload UI (/admin/payroll) with drag-n-drop file upload.
+- Created Employee Payslip View (/employee/payroll) with secure download.
+- Updated Sidebar with Payroll links.

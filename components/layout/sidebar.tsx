@@ -131,6 +131,13 @@ export function MobileSidebar({ role = "core_staff" }: SidebarProps) {
             active: pathname.includes("/requests"),
             roles: ["hr_admin"]
         },
+        {
+            title: "Payroll",
+            href: "/admin/payroll",
+            icon: Banknote,
+            active: pathname.includes("/admin/payroll"),
+            roles: ["hr_admin"]
+        },
         // Manager
         {
             title: "Team Leaves",
