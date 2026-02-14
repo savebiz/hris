@@ -1,14 +1,14 @@
 "use client"
 
 import { useFormState } from "react-dom"
-import { uploadPayslip } from "@/app/(protected)/payroll/actions"
+import { uploadPayslip, UploadState } from "@/app/(protected)/payroll/actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Upload } from "lucide-react"
 import { useEffect, useRef } from "react"
 
-const initialState = {
+const initialState: UploadState = {
     message: "",
     error: ""
 }

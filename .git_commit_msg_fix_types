@@ -1,0 +1,5 @@
+fix: resolve useFormState type mismatch in payroll form
+
+- Defined `UploadState` interface in payroll/actions.ts.
+- Typed `uploadPayslip` params and return value.
+- Updated `UploadPayslipForm` initial state to match UploadState.
