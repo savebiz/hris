@@ -1,0 +1,4 @@
+fix: mobile responsive adjustments
+
+- Updated Profile Correction and Leave Request forms to use responsive grids.
+- Ensured tables handle horizontal scrolling on small screens.

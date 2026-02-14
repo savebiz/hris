@@ -72,8 +72,8 @@ export function ProfileCorrectionDialog({ profile }: { profile: any }) {
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
                     <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="name" className="text-right">
+                        <div className="grid grid-cols-1 sm:grid-cols-4 items-start sm:items-center gap-2 sm:gap-4">
+                            <Label htmlFor="name" className="text-left sm:text-right">
                                 Name
                             </Label>
                             <Input
@@ -83,8 +83,8 @@ export function ProfileCorrectionDialog({ profile }: { profile: any }) {
                                 className="col-span-3"
                             />
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="phone" className="text-right">
+                        <div className="grid grid-cols-1 sm:grid-cols-4 items-start sm:items-center gap-2 sm:gap-4">
+                            <Label htmlFor="phone" className="text-left sm:text-right">
                                 Phone
                             </Label>
                             <Input
@@ -94,8 +94,8 @@ export function ProfileCorrectionDialog({ profile }: { profile: any }) {
                                 className="col-span-3"
                             />
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="address" className="text-right">
+                        <div className="grid grid-cols-1 sm:grid-cols-4 items-start sm:items-center gap-2 sm:gap-4">
+                            <Label htmlFor="address" className="text-left sm:text-right">
                                 Address
                             </Label>
                             <Textarea
