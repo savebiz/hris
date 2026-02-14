@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { logAction } from '@/lib/audit'
 
-export async function uploadPayslip(formData: FormData) {
+export async function uploadPayslip(prevState: any, formData: FormData) {
     const supabase = await createClient()
 
     // 1. Auth Check (Admin Only)

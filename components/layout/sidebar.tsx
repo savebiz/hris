@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ShieldCheck, LayoutDashboard, Users, FileText, Calendar, Menu, LogOut, Settings } from "lucide-react"
+import { ShieldCheck, LayoutDashboard, Users, FileText, Calendar, Menu, LogOut, Settings, Banknote } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 // import { Button } from "@/components/ui/button" // Assuming standard button
@@ -129,6 +129,20 @@ export function MobileSidebar({ role = "core_staff" }: SidebarProps) {
             href: "/admin/requests",
             icon: Users,
             active: pathname.includes("/requests"),
+            roles: ["hr_admin"]
+        },
+        {
+            title: "Payroll",
+            href: "/admin/payroll",
+            icon: Banknote,
+            active: pathname.includes("/admin/payroll"),
+            roles: ["hr_admin"]
+        },
+        {
+            title: "Payroll",
+            href: "/admin/payroll",
+            icon: Banknote,
+            active: pathname.includes("/admin/payroll"),
             roles: ["hr_admin"]
         },
         {

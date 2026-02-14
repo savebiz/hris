@@ -1,0 +1,5 @@
+fix: resolve build error in admin payroll form
+
+- Refactored Admin Payroll Form to use `useFormState` in a Client Component.
+- Updated `uploadPayslip` signature to accept `prevState`.
+- Added Payroll links to Sidebar.
