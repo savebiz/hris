@@ -1,0 +1,7 @@
+feat: implement Performance Module (Phase 12)
+
+- Added 'performance_cycles' and 'performance_goals' schema with RLS.
+- Created Admin Cycle Management (/admin/performance).
+- Created Employee Goal Tracking (/employee/performance).
+- Added Server Actions for goals and cycles.
+- Updated Sidebar with Performance/Goals links.
