@@ -1,0 +1,4 @@
+fix: resolve build errors
+
+- Added missing shadcn components: Dialog, Textarea.
+- Restored missing server actions in admin/actions.ts and employee/actions.ts for profile workflow.

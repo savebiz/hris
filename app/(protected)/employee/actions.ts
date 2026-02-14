@@ -144,3 +144,46 @@ export async function getDocumentUrl(path: string) {
 
     return data.signedUrl
 }
+
+export async function submitProfileRequest(data: Record<string, any>) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "Unauthorized" }
+
+    const { error } = await supabase
+        .from('profile_change_requests')
+        .insert({
+            user_id: user.id,
+            data: data,
+            status: 'pending'
+        })
+
+    if (error) {
+        console.error("Profile Request Error:", error)
+        return { error: "Failed to submit request" }
+    }
+
+    await logAction({
+        action: 'create',
+        resourceType: 'profile_change_request',
+        actorId: user.id,
+        details: { fields: Object.keys(data) }
+    })
+
+    return { success: true, message: "Request submitted for HR review" }
+}
+
+export async function getMyProfileRequests() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+
+    const { data, error } = await supabase
+        .from('profile_change_requests')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+    if (error) return []
+    return data
+}

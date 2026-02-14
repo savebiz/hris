@@ -265,5 +265,91 @@ export async function getAuditLogs() {
     return data
 }
 
+export async function getProfileRequests() {
+    const supabase = await createClient()
+
+    // Join with profiles to know WHO is requesting
+    const { data, error } = await supabase
+        .from('profile_change_requests')
+        .select(`
+            *,
+            profiles:user_id (id, full_name, email, avatar_url)
+        `)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: true })
+
+    if (error) {
+        console.error("Error fetching profile requests:", error)
+        return []
+    }
+    return data
+}
+
+export async function approveProfileRequest(requestId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "Unauthorized" }
+
+    // 1. Get the request data
+    const { data: request, error: fetchError } = await supabase
+        .from('profile_change_requests')
+        .select('*')
+        .eq('id', requestId)
+        .single()
+
+    if (fetchError || !request) return { error: "Request not found" }
+
+    // 2. Update the actual Profile
+    // 'request.data' is jsonb, e.g. { phone: '123' }
+    const { error: updateError } = await supabase
+        .from('profiles')
+        .update(request.data)
+        .eq('id', request.user_id)
+
+    if (updateError) return { error: "Failed to update profile: " + updateError.message }
+
+    // 3. Mark request as approved
+    const { error: statusError } = await supabase
+        .from('profile_change_requests')
+        .update({ status: 'approved', admin_comment: 'Approved by ' + user.email })
+        .eq('id', requestId)
+
+    // 4. Log audit
+    await logAction({
+        action: 'approve_profile_update',
+        resourceType: 'profile',
+        resourceId: request.user_id,
+        actorId: user.id,
+        details: request.data
+    })
+
+    revalidatePath('/admin/dashboard')
+    revalidatePath('/admin/requests')
+    return { success: true }
+}
+
+export async function rejectProfileRequest(requestId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "Unauthorized" }
+
+    const { error } = await supabase
+        .from('profile_change_requests')
+        .update({ status: 'rejected', admin_comment: 'Rejected by ' + user.email })
+        .eq('id', requestId)
+
+    if (error) return { error: error.message }
+
+    await logAction({
+        action: 'reject_profile_update',
+        resourceType: 'profile_change_request',
+        resourceId: requestId,
+        actorId: user.id
+    })
+
+    revalidatePath('/admin/requests')
+    return { success: true }
+}
+
 
 
