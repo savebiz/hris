@@ -1,0 +1,7 @@
+feat: implement Onboarding Module (Phase 11)
+
+- Added 'onboarding_library' and 'user_tasks' schema.
+- Created Server Actions for library management and task assignment.
+- Built Admin UI (/admin/onboarding) for defining and assigning tasks.
+- Built Employee UI (/employee/onboarding) for viewing and completing tasks.
+- Updated Sidebar with Onboarding links.
