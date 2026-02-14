@@ -1,0 +1,5 @@
+fix: add missing UI components and dependencies
+
+- Created components/ui/checkbox.tsx
+- Created components/ui/progress.tsx
+- Added @radix-ui/react-checkbox and @radix-ui/react-progress to package.json
