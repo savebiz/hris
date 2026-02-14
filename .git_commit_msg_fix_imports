@@ -1,0 +1,3 @@
+fix: restore missing Card imports in admin payroll page
+
+- Added back import { Card, ... } from "@/components/ui/card" which was accidentally removed.

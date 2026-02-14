@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { getStaffList } from "../actions"
 import { getPayslips } from "../../payroll/actions"
 import { UploadPayslipForm } from "@/components/payroll/upload-form"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { FileText } from "lucide-react"
 
 export const metadata: Metadata = {
