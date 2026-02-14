@@ -32,31 +32,59 @@ export function Sidebar({ className, role = "core_staff" }: SidebarProps) {
     const navItems = [
         {
             title: "Dashboard",
-            href: role === "hr_admin" ? "/admin/dashboard" : "/employee/dashboard",
+            href: role === "hr_admin" ? "/admin/dashboard" : role === "line_manager" ? "/manager/dashboard" : "/employee/dashboard",
             icon: LayoutDashboard,
-            active: pathname.includes("/dashboard"),
+            active: pathname.endsWith("/dashboard"),
             roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
         },
         {
-            title: "Team Leaves",
-            href: "/manager/leaves",
-            icon: Users,
-            active: pathname.includes("/manager/leaves"),
-            roles: ["line_manager"]
+            title: role === "hr_admin" ? "Leave Management" : role === "line_manager" ? "Team Leaves" : "My Leaves",
+            href: role === "hr_admin" ? "/admin/leaves" : role === "line_manager" ? "/manager/leaves" : "/employee/leaves",
+            icon: Calendar,
+            active: pathname.includes("/leaves"),
+            roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
         },
         {
-            title: role === "hr_admin" ? "Leave Management" : "My Leaves",
-            href: role === "hr_admin" ? "/admin/leaves" : "/employee/leaves",
-            icon: Calendar,
-            active: pathname.includes("/employee/leaves") || pathname.includes("/admin/leaves"),
+            title: role === "hr_admin" ? "Staff Management" : "My Team",
+            href: role === "hr_admin" ? "/admin/staff" : "/manager/dashboard", // Manager dashboard has team view
+            icon: Users,
+            active: pathname.includes("/staff"),
+            roles: ["hr_admin"]
+        },
+        {
+            title: role === "hr_admin" ? "Payroll" : "My Payslips",
+            href: role === "hr_admin" ? "/admin/payroll" : "/employee/payroll",
+            icon: Banknote,
+            active: pathname.includes("/payroll"),
+            roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
+        },
+        {
+            title: role === "hr_admin" ? "Performance" : role === "line_manager" ? "Team Goals" : "My Goals",
+            href: role === "hr_admin" ? "/admin/performance" : role === "line_manager" ? "/manager/performance" : "/employee/performance",
+            icon: Target,
+            active: pathname.includes("/performance"),
+            roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
+        },
+        {
+            title: role === "hr_admin" ? "Onboarding" : role === "line_manager" ? "Team Onboarding" : "My Onboarding",
+            href: role === "hr_admin" ? "/admin/onboarding" : role === "line_manager" ? "/manager/onboarding" : "/employee/onboarding",
+            icon: ListTodo,
+            active: pathname.includes("/onboarding"),
             roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
         },
         {
             title: role === "hr_admin" ? "Documents" : "My Documents",
-            href: role === "hr_admin" ? "/admin/documents" : "/employee/documents", // Placeholder
+            href: role === "hr_admin" ? "/admin/documents" : "/employee/documents",
             icon: FileText,
-            active: pathname.includes("/documents"),
+            active: pathname.includes("/documents") && !pathname.includes("/admin/documents/"), // Prevent active state overlap if needed, though usually fine
             roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
+        },
+        {
+            title: "Profile Requests",
+            href: "/admin/requests",
+            icon: Users,
+            active: pathname.includes("/requests"),
+            roles: ["hr_admin"]
         },
     ]
 
@@ -107,22 +135,56 @@ export function Sidebar({ className, role = "core_staff" }: SidebarProps) {
 
 export function MobileSidebar({ role = "core_staff" }: SidebarProps) {
     const pathname = usePathname()
-    // Duplicate logic for mobile - in a real app, extract to shared hook/component
+    // Unified nav items for mobile
     const navItems = [
         {
             title: "Dashboard",
-            href: role === "hr_admin" ? "/admin/dashboard" : "/employee/dashboard",
+            href: role === "hr_admin" ? "/admin/dashboard" : role === "line_manager" ? "/manager/dashboard" : "/employee/dashboard",
             icon: LayoutDashboard,
-            active: pathname.includes("/dashboard"),
+            active: pathname.endsWith("/dashboard"),
             roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
         },
-        // Admin
         {
-            title: "Staff Management",
-            href: "/admin/staff",
+            title: role === "hr_admin" ? "Leave Management" : role === "line_manager" ? "Team Leaves" : "My Leaves",
+            href: role === "hr_admin" ? "/admin/leaves" : role === "line_manager" ? "/manager/leaves" : "/employee/leaves",
+            icon: Calendar,
+            active: pathname.includes("/leaves"),
+            roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
+        },
+        {
+            title: role === "hr_admin" ? "Staff Management" : "My Team", // Manager accesses team via dashboard for now, or we add specific route
+            href: role === "hr_admin" ? "/admin/staff" : "/manager/dashboard",
             icon: Users,
             active: pathname.includes("/staff"),
             roles: ["hr_admin"]
+        },
+        {
+            title: role === "hr_admin" ? "Payroll" : "My Payslips",
+            href: role === "hr_admin" ? "/admin/payroll" : "/employee/payroll",
+            icon: Banknote,
+            active: pathname.includes("/payroll"),
+            roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
+        },
+        {
+            title: role === "hr_admin" ? "Performance" : role === "line_manager" ? "Team Goals" : "My Goals",
+            href: role === "hr_admin" ? "/admin/performance" : role === "line_manager" ? "/manager/performance" : "/employee/performance",
+            icon: Target,
+            active: pathname.includes("/performance"),
+            roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
+        },
+        {
+            title: role === "hr_admin" ? "Onboarding" : role === "line_manager" ? "Team Onboarding" : "My Onboarding",
+            href: role === "hr_admin" ? "/admin/onboarding" : role === "line_manager" ? "/manager/onboarding" : "/employee/onboarding",
+            icon: ListTodo,
+            active: pathname.includes("/onboarding"),
+            roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
+        },
+        {
+            title: role === "hr_admin" ? "Documents" : "My Documents",
+            href: role === "hr_admin" ? "/admin/documents" : "/employee/documents", // Placeholder
+            icon: FileText,
+            active: pathname.includes("/documents"),
+            roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
         },
         {
             title: "Profile Requests",
@@ -130,64 +192,6 @@ export function MobileSidebar({ role = "core_staff" }: SidebarProps) {
             icon: Users,
             active: pathname.includes("/requests"),
             roles: ["hr_admin"]
-        },
-        {
-            title: "Payroll",
-            href: "/admin/payroll",
-            icon: Banknote,
-            active: pathname.includes("/admin/payroll"),
-            roles: ["hr_admin"]
-        },
-        {
-            title: "Payroll",
-            href: "/admin/payroll",
-            icon: Banknote,
-            active: pathname.includes("/admin/payroll"),
-            roles: ["hr_admin"]
-        },
-        {
-            title: "Payroll",
-            href: "/admin/payroll",
-            icon: Banknote,
-            active: pathname.includes("/admin/payroll"),
-            roles: ["hr_admin"]
-        },
-        {
-            title: "Onboarding",
-            href: "/admin/onboarding",
-            icon: ListTodo,
-            active: pathname.includes("/admin/onboarding"),
-            roles: ["hr_admin"]
-        },
-        {
-            title: "Performance",
-            href: "/admin/performance",
-            icon: Target,
-            active: pathname.includes("/admin/performance"),
-            roles: ["hr_admin"]
-        },
-        // Manager
-        {
-            title: "Team Leaves",
-            href: "/manager/leaves",
-            icon: Users,
-            active: pathname.includes("/manager/leaves"),
-            roles: ["line_manager"]
-        },
-        // Shared
-        {
-            title: role === "hr_admin" ? "Leave Management" : "My Leaves",
-            href: role === "hr_admin" ? "/admin/leaves" : "/employee/leaves",
-            icon: Calendar,
-            active: pathname.includes("/employee/leaves") || pathname.includes("/admin/leaves"),
-            roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
-        },
-        {
-            title: role === "hr_admin" ? "Documents" : "My Documents",
-            href: role === "hr_admin" ? "/admin/documents" : "/employee/documents",
-            icon: FileText,
-            active: pathname.includes("/documents"),
-            roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
         },
     ]
     const filteredNav = navItems.filter(item => item.roles.includes(role))

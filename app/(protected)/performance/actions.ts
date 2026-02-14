@@ -18,6 +18,7 @@ export type Goal = {
     status: 'pending' | 'in_progress' | 'completed' | 'cancelled'
     progress: number
     cycle_id: string
+    created_at: string
 }
 
 export type GoalState = {
@@ -120,4 +121,33 @@ export async function updateGoal(goalId: string, progress: number, status: strin
 
     revalidatePath('/employee/performance')
     return { success: true }
+}
+
+export async function getTeamGoals() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+
+    // 1. Get Team Members
+    const { data: team } = await supabase.from('profiles').select('id').eq('manager_id', user.id)
+    if (!team || team.length === 0) return []
+
+    const teamIds = team.map(t => t.id)
+
+    // 2. Get Goals
+    const { data: goals, error } = await supabase
+        .from('performance_goals')
+        .select(`
+            *,
+            profiles:user_id (full_name, avatar_url, job_title)
+        `)
+        .in('user_id', teamIds)
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error("Error fetching team goals:", error)
+        return []
+    }
+
+    return goals as (Goal & { profiles: any })[]
 }

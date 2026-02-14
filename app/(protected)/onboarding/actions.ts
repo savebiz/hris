@@ -127,3 +127,38 @@ export async function toggleTaskStatus(taskId: string, status: 'pending' | 'comp
     revalidatePath('/employee/onboarding')
     return { success: true }
 }
+
+export async function getTeamOnboardingStatus() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+
+    // 1. Get Team Members
+    const { data: team } = await supabase.from('profiles').select('*').eq('manager_id', user.id)
+    if (!team || team.length === 0) return []
+
+    // 2. Get Tasks for Team
+    const teamIds = team.map(t => t.id)
+    const { data: tasks } = await supabase
+        .from('user_tasks')
+        .select('*')
+        .in('user_id', teamIds)
+
+    // 3. Aggregate Progress
+    // We want to return: { user: Profile, progress: number, total: number, completed: number }
+    const result = team.map(member => {
+        const memberTasks = tasks?.filter(t => t.user_id === member.id) || []
+        const total = memberTasks.length
+        const completed = memberTasks.filter(t => t.status === 'completed').length
+        const progress = total > 0 ? Math.round((completed / total) * 100) : 0
+
+        return {
+            user: member,
+            progress,
+            total,
+            completed
+        }
+    })
+
+    return result
+}
