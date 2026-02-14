@@ -38,21 +38,21 @@ export function Sidebar({ className, role = "core_staff" }: SidebarProps) {
             roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
         },
         {
-            title: "Staff Management",
-            href: "/admin/staff", // Placeholder
+            title: "Team Leaves",
+            href: "/manager/leaves",
             icon: Users,
-            active: pathname.includes("/staff"),
-            roles: ["hr_admin"]
+            active: pathname.includes("/manager/leaves"),
+            roles: ["line_manager"]
         },
         {
-            title: "Leave Management",
+            title: role === "hr_admin" ? "Leave Management" : "My Leaves",
             href: role === "hr_admin" ? "/admin/leaves" : "/employee/leaves",
             icon: Calendar,
-            active: pathname.includes("/leaves"),
+            active: pathname.includes("/employee/leaves") || pathname.includes("/admin/leaves"),
             roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
         },
         {
-            title: "Documents",
+            title: role === "hr_admin" ? "Documents" : "My Documents",
             href: role === "hr_admin" ? "/admin/documents" : "/employee/documents", // Placeholder
             icon: FileText,
             active: pathname.includes("/documents"),
@@ -116,6 +116,7 @@ export function MobileSidebar({ role = "core_staff" }: SidebarProps) {
             active: pathname.includes("/dashboard"),
             roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
         },
+        // Admin
         {
             title: "Staff Management",
             href: "/admin/staff",
@@ -123,15 +124,24 @@ export function MobileSidebar({ role = "core_staff" }: SidebarProps) {
             active: pathname.includes("/staff"),
             roles: ["hr_admin"]
         },
+        // Manager
         {
-            title: "Leave Requests",
+            title: "Team Leaves",
+            href: "/manager/leaves",
+            icon: Users,
+            active: pathname.includes("/manager/leaves"),
+            roles: ["line_manager"]
+        },
+        // Shared
+        {
+            title: role === "hr_admin" ? "Leave Management" : "My Leaves",
             href: role === "hr_admin" ? "/admin/leaves" : "/employee/leaves",
             icon: Calendar,
-            active: pathname.includes("/leaves"),
+            active: pathname.includes("/employee/leaves") || pathname.includes("/admin/leaves"),
             roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
         },
         {
-            title: "Documents",
+            title: role === "hr_admin" ? "Documents" : "My Documents",
             href: role === "hr_admin" ? "/admin/documents" : "/employee/documents",
             icon: FileText,
             active: pathname.includes("/documents"),

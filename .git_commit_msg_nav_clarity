@@ -1,0 +1,5 @@
+fix: clarify manager navigation and sidebar links
+
+- Split "Leave Management" into "Team Leaves" and "My Leaves" for managers.
+- Created /manager/leaves page for team request management.
+- Updated sidebar to clearly distinguish between management actions and self-service.
