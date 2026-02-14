@@ -42,6 +42,12 @@ export async function Header() {
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem asChild>
+                                <a href="/employee/profile" className="cursor-pointer w-full flex items-center">
+                                    <User className="mr-2 h-4 w-4" />
+                                    My Profile
+                                </a>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
                                 {/* We can't use Next.js navigation in MenuItem easily for logout action without client component, so keeping simple link for now or handle via client wrapper */}
                                 <form action="/auth/signout" method="post" className="w-full">
                                     <button className="flex w-full items-center" type="submit">

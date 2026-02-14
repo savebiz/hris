@@ -1,0 +1,6 @@
+feat: implement Profile Correction Workflow
+
+- Added /employee/profile page with Edit Dialog.
+- Added /admin/requests page for HR approval.
+- Implemented request submission and approval server actions.
+- Updated Header and Sidebar with navigation links.

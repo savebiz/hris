@@ -124,6 +124,13 @@ export function MobileSidebar({ role = "core_staff" }: SidebarProps) {
             active: pathname.includes("/staff"),
             roles: ["hr_admin"]
         },
+        {
+            title: "Profile Requests",
+            href: "/admin/requests",
+            icon: Users,
+            active: pathname.includes("/requests"),
+            roles: ["hr_admin"]
+        },
         // Manager
         {
             title: "Team Leaves",
