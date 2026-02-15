@@ -343,9 +343,22 @@ export async function getAuditLogs() {
 
 export async function getProfileRequests() {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+
+    // Use Service Role to bypass RLS
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!serviceKey) return []
+
+    const { createClient: createSupabaseClient } = require('@supabase/supabase-js')
+    const supabaseAdmin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        serviceKey,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
 
     // Join with profiles to know WHO is requesting
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
         .from('profile_change_requests')
         .select(`
             *,
@@ -366,8 +379,18 @@ export async function approveProfileRequest(requestId: string) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: "Unauthorized" }
 
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!serviceKey) return { error: "Configuration Error" }
+
+    const { createClient: createSupabaseClient } = require('@supabase/supabase-js')
+    const supabaseAdmin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        serviceKey,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+
     // 1. Get the request data
-    const { data: request, error: fetchError } = await supabase
+    const { data: request, error: fetchError } = await supabaseAdmin
         .from('profile_change_requests')
         .select('*')
         .eq('id', requestId)
@@ -377,7 +400,7 @@ export async function approveProfileRequest(requestId: string) {
 
     // 2. Update the actual Profile
     // 'request.data' is jsonb, e.g. { phone: '123' }
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
         .from('profiles')
         .update(request.data)
         .eq('id', request.user_id)
@@ -385,7 +408,7 @@ export async function approveProfileRequest(requestId: string) {
     if (updateError) return { error: "Failed to update profile: " + updateError.message }
 
     // 3. Mark request as approved
-    const { error: statusError } = await supabase
+    const { error: statusError } = await supabaseAdmin
         .from('profile_change_requests')
         .update({ status: 'approved', admin_comment: 'Approved by ' + user.email })
         .eq('id', requestId)
@@ -409,7 +432,17 @@ export async function rejectProfileRequest(requestId: string) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: "Unauthorized" }
 
-    const { error } = await supabase
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!serviceKey) return { error: "Configuration Error" }
+
+    const { createClient: createSupabaseClient } = require('@supabase/supabase-js')
+    const supabaseAdmin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        serviceKey,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+
+    const { error } = await supabaseAdmin
         .from('profile_change_requests')
         .update({ status: 'rejected', admin_comment: 'Rejected by ' + user.email })
         .eq('id', requestId)
