@@ -543,6 +543,7 @@ export async function updateStaff(userId: string, data: CreateStaffValues) {
             project_location: data.project_location!,
             deployment_start_date: data.deployment_start_date!,
             supervisor_name: data.supervisor_name!,
+            date_of_engagement: data.deployment_start_date || new Date().toISOString().split('T')[0]
         })
         if (upsertError) return { error: "Support Details Update Error: " + upsertError.message }
 
