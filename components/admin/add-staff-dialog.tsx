@@ -36,11 +36,13 @@ import {
 } from "@/components/ui/select"
 import { createStaff } from "@/app/(protected)/admin/actions"
 import { createStaffSchema } from "@/lib/schemas/admin"
+import { useToast } from "@/hooks/use-toast"
 
 export function AddStaffDialog() {
     const [open, setOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
     const router = useRouter()
+    const { toast } = useToast()
 
     const form = useForm<z.infer<typeof createStaffSchema>>({
         resolver: zodResolver(createStaffSchema),
@@ -68,9 +70,16 @@ export function AddStaffDialog() {
         startTransition(async () => {
             const result = await createStaff(values)
             if (result.error) {
-                alert(result.error) // Replace with toast
+                toast({
+                    variant: "destructive",
+                    title: "Error creating staff",
+                    description: result.error,
+                })
             } else {
-                alert("Staff member added successfully") // Replace with toast
+                toast({
+                    title: "Success",
+                    description: "Staff member created and account initialized.",
+                })
                 setOpen(false)
                 form.reset()
                 router.refresh()
