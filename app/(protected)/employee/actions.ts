@@ -17,6 +17,17 @@ export async function submitLeaveRequest(data: LeaveFormValues) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: "Unauthorized. Please login." }
 
+    // Check user role
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    if (profile?.role === 'support_staff') {
+        return { error: "Unauthorized: Support Staff are not eligible for leave." }
+    }
+
     const { error } = await supabase
         .from('leave_requests')
         .insert({

@@ -42,7 +42,7 @@ export function Sidebar({ className, role = "core_staff" }: SidebarProps) {
             href: role === "hr_admin" ? "/admin/leaves" : role === "line_manager" ? "/manager/leaves" : "/employee/leaves",
             icon: Calendar,
             active: pathname.includes("/leaves"),
-            roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
+            roles: ["hr_admin", "line_manager", "core_staff"]
         },
         {
             title: role === "hr_admin" ? "Staff Management" : "My Team",
@@ -63,7 +63,7 @@ export function Sidebar({ className, role = "core_staff" }: SidebarProps) {
             href: role === "hr_admin" ? "/admin/performance" : role === "line_manager" ? "/manager/performance" : "/employee/performance",
             icon: Target,
             active: pathname.includes("/performance"),
-            roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
+            roles: ["hr_admin", "line_manager", "core_staff"]
         },
         {
             title: role === "hr_admin" ? "Onboarding" : role === "line_manager" ? "Team Onboarding" : "My Onboarding",
@@ -149,7 +149,7 @@ export function MobileSidebar({ role = "core_staff" }: SidebarProps) {
             href: role === "hr_admin" ? "/admin/leaves" : role === "line_manager" ? "/manager/leaves" : "/employee/leaves",
             icon: Calendar,
             active: pathname.includes("/leaves"),
-            roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
+            roles: ["hr_admin", "line_manager", "core_staff"]
         },
         {
             title: role === "hr_admin" ? "Staff Management" : "My Team", // Manager accesses team via dashboard for now, or we add specific route
@@ -170,7 +170,7 @@ export function MobileSidebar({ role = "core_staff" }: SidebarProps) {
             href: role === "hr_admin" ? "/admin/performance" : role === "line_manager" ? "/manager/performance" : "/employee/performance",
             icon: Target,
             active: pathname.includes("/performance"),
-            roles: ["hr_admin", "line_manager", "core_staff", "support_staff"]
+            roles: ["hr_admin", "line_manager", "core_staff"]
         },
         {
             title: role === "hr_admin" ? "Onboarding" : role === "line_manager" ? "Team Onboarding" : "My Onboarding",
