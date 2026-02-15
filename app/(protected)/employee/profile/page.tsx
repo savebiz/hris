@@ -46,7 +46,7 @@ export default async function EmployeeProfilePage() {
                             </div>
                             <div>
                                 <label className="text-muted-foreground">Phone</label>
-                                <p className="font-medium">{profile?.phone || '-'}</p>
+                                <p className="font-medium">{profile?.phone_number || '-'}</p>
                             </div>
                             <div>
                                 <label className="text-muted-foreground">Role</label>
@@ -54,7 +54,7 @@ export default async function EmployeeProfilePage() {
                             </div>
                             <div className="col-span-2">
                                 <label className="text-muted-foreground">Address</label>
-                                <p className="font-medium">{profile?.address || '-'}</p>
+                                <p className="font-medium">{profile?.residential_address || '-'}</p>
                             </div>
                         </div>
                     </CardContent>
