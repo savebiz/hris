@@ -16,8 +16,10 @@ import {
 } from "@/components/ui/dialog"
 import { submitProfileRequest } from "@/app/(protected)/employee/actions"
 import { Pencil } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 export function ProfileCorrectionDialog({ profile }: { profile: any }) {
+    const { toast } = useToast()
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
 
@@ -49,9 +51,17 @@ export function ProfileCorrectionDialog({ profile }: { profile: any }) {
         setLoading(false)
         if (result.success) {
             setOpen(false)
-            // Optional: Toast message
+            toast({
+                title: "Request Submitted",
+                description: "Your profile update request has been sent to HR.",
+                className: "bg-green-600 text-white border-none",
+            })
         } else {
-            alert(result.error)
+            toast({
+                title: "Submission Failed",
+                description: result.error || "Could not submit request. Please try again.",
+                variant: "destructive",
+            })
         }
     }
 

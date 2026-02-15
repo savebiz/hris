@@ -170,6 +170,9 @@ export async function submitProfileRequest(data: Record<string, any>) {
         details: { fields: Object.keys(data) }
     })
 
+    revalidatePath('/employee/profile')
+    revalidatePath('/admin/requests')
+
     return { success: true, message: "Request submitted for HR review" }
 }
 
