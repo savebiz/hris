@@ -60,3 +60,10 @@ export async function signup(formData: FormData) {
     revalidatePath('/', 'layout')
     redirect('/login?message=Check your email for confirmation.')
 }
+
+export async function signOut() {
+    const supabase = await createClient()
+    await supabase.auth.signOut()
+    revalidatePath('/', 'layout')
+    redirect('/login')
+}

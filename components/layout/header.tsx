@@ -5,6 +5,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { LogOut, User } from "lucide-react"
 
+import { signOut } from "@/app/(auth)/actions/auth"
+
 export async function Header() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -48,8 +50,7 @@ export async function Header() {
                                 </a>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
-                                {/* We can't use Next.js navigation in MenuItem easily for logout action without client component, so keeping simple link for now or handle via client wrapper */}
-                                <form action="/auth/signout" method="post" className="w-full">
+                                <form action={signOut} className="w-full">
                                     <button className="flex w-full items-center" type="submit">
                                         <LogOut className="mr-2 h-4 w-4" />
                                         Log out
