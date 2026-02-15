@@ -107,12 +107,20 @@ export async function createStaff(data: CreateStaffValues) {
 export async function getStaffList() {
     const supabase = await createClient()
 
-    // Fetch profiles from public table
-    // In a real app we might join with auth.users using admin API if needed, 
-    // but typically profiles table has the display info.
+    // Fetch profiles with related details
     const { data: profiles, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+            *,
+            core_staff_details (
+                department,
+                job_title
+            ),
+            support_staff_details (
+                project_assignment,
+                project_location
+            )
+        `)
         .order('created_at', { ascending: false })
 
     if (error) {
@@ -120,7 +128,22 @@ export async function getStaffList() {
         return []
     }
 
-    return profiles
+    // Transform data to flat structure expected by UI
+    return profiles.map((p: any) => {
+        const core = p.core_staff_details
+        const support = p.support_staff_details
+
+        // Handle array or object return from join (Supabase can vary based on relation config)
+        const coreData = Array.isArray(core) ? core[0] : core
+        const supportData = Array.isArray(support) ? support[0] : support
+
+        return {
+            ...p,
+            department: coreData?.department || supportData?.project_assignment || null,
+            job_title: coreData?.job_title || (p.role === 'support_staff' ? 'Support Staff' : p.role),
+            staff_type: coreData ? 'core' : 'support' // simpler inference
+        }
+    })
 }
 
 export async function getLeaveRequests() {
