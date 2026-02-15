@@ -409,5 +409,133 @@ export async function rejectProfileRequest(requestId: string) {
     return { success: true }
 }
 
+export async function deactivateStaff(userId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "Unauthorized" }
+
+    // Check if actor is admin
+    // (In a real app, strict RBAC check here)
+
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!serviceKey) return { error: "Configuration Error" }
+
+    const { createClient: createSupabaseClient } = require('@supabase/supabase-js')
+    const supabaseAdmin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        serviceKey,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+
+    // 1. Disable Auth User
+    const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
+        userId,
+        { ban_duration: "876000h" } // Ban for 100 years effectively
+    )
+    if (authError) return { error: "Auth Update Error: " + authError.message }
+
+    // 2. Update Support Staff Status if applicable
+    // We try to update both tables, easier than checking role first
+    await supabaseAdmin.from('support_staff_details').update({ status: 'Deactivated' }).eq('id', userId)
+    await supabaseAdmin.from('core_staff_details').update({ employment_status: 'disengaged' }).eq('id', userId)
+
+    // 3. Audit
+    await logAction({
+        action: 'deactivate_staff',
+        resourceType: 'user',
+        resourceId: userId,
+        actorId: user.id
+    })
+
+    revalidatePath('/admin/staff')
+    return { success: true }
+}
+
+export async function getStaffDetails(userId: string) {
+    const supabase = await createClient()
+
+    // Fetch Profile
+    const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+
+    if (profileError || !profile) return { error: "Profile not found" }
+
+    // Fetch Details based on role/category strategy
+    // We'll try fetching both to be sure
+    const { data: coreDetails } = await supabase.from('core_staff_details').select('*').eq('id', userId).single()
+    const { data: supportDetails } = await supabase.from('support_staff_details').select('*').eq('id', userId).single()
+
+    return {
+        profile,
+        coreDetails,
+        supportDetails,
+        category: coreDetails ? 'core' : 'support'
+    }
+}
+
+export async function updateStaff(userId: string, data: CreateStaffValues) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "Unauthorized" }
+
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!serviceKey) return { error: "Configuration Error" }
+
+    const { createClient: createSupabaseClient } = require('@supabase/supabase-js')
+    const supabaseAdmin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        serviceKey,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+
+    // 1. Update Profile (Base)
+    const finalRole = data.staff_category === 'support' ? 'support_staff' : data.role
+    const { error: profileError } = await supabaseAdmin.from('profiles').update({
+        full_name: data.full_name,
+        // email: data.email, // Email change requires auth update usually, skipping for now
+        phone_number: data.phone_number,
+        residential_address: data.residential_address,
+        role: finalRole,
+        updated_at: new Date().toISOString()
+    }).eq('id', userId)
+
+    if (profileError) return { error: "Profile Update Error: " + profileError.message }
+
+    // 2. Update Details
+    if (data.staff_category === 'core') {
+        const { error: detailError } = await supabaseAdmin.from('core_staff_details').upsert({
+            id: userId,
+            staff_id: data.staff_id!,
+            job_title: data.job_title!,
+            department: data.department!,
+            date_of_employment: data.date_of_employment!,
+        }) // We don't overwrite employment_status blindly
+        if (detailError) return { error: "Core Details Update Error: " + detailError.message }
+    } else {
+        const { error: detailError } = await supabaseAdmin.from('support_staff_details').upsert({
+            id: userId,
+            project_assignment: data.project_assignment!,
+            project_location: data.project_location!,
+            deployment_start_date: data.deployment_start_date!,
+            supervisor_name: data.supervisor_name!,
+        })
+        if (detailError) return { error: "Support Details Update Error: " + detailError.message }
+    }
+
+    // 3. Audit
+    await logAction({
+        action: 'update_staff',
+        resourceType: 'profile',
+        resourceId: userId,
+        actorId: user.id,
+        details: { role: finalRole, changes: data }
+    })
+
+    revalidatePath('/admin/staff')
+    return { success: true }
+}
 
 
