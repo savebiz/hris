@@ -107,20 +107,10 @@ export async function createStaff(data: CreateStaffValues) {
 export async function getStaffList() {
     const supabase = await createClient()
 
-    // Fetch profiles with related details
+    // 1. Fetch All Profiles
     const { data: profiles, error } = await supabase
         .from('profiles')
-        .select(`
-            *,
-            core_staff_details (
-                department,
-                job_title
-            ),
-            support_staff_details (
-                project_assignment,
-                project_location
-            )
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
 
     if (error) {
@@ -128,20 +118,25 @@ export async function getStaffList() {
         return []
     }
 
-    // Transform data to flat structure expected by UI
-    return profiles.map((p: any) => {
-        const core = p.core_staff_details
-        const support = p.support_staff_details
+    // 2. Fetch All Details (In a real app with pagination, we'd only fetch for the IDs we got)
+    // For now, fetching all is fine for a small list.
+    const { data: coreDetails } = await supabase.from('core_staff_details').select('*')
+    const { data: supportDetails } = await supabase.from('support_staff_details').select('*')
 
-        // Handle array or object return from join (Supabase can vary based on relation config)
-        const coreData = Array.isArray(core) ? core[0] : core
-        const supportData = Array.isArray(support) ? support[0] : support
+    // 3. Create Map for O(1) Lookup
+    const coreMap = new Map(coreDetails?.map(d => [d.id, d]) || [])
+    const supportMap = new Map(supportDetails?.map(d => [d.id, d]) || [])
+
+    // 4. Merge
+    return profiles.map((p: any) => {
+        const core = coreMap.get(p.id)
+        const support = supportMap.get(p.id)
 
         return {
             ...p,
-            department: coreData?.department || supportData?.project_assignment || null,
-            job_title: coreData?.job_title || (p.role === 'support_staff' ? 'Support Staff' : p.role),
-            staff_type: coreData ? 'core' : 'support' // simpler inference
+            department: core?.department || support?.project_assignment || null,
+            job_title: core?.job_title || (p.role === 'support_staff' ? 'Support Staff' : p.role),
+            staff_type: core ? 'core' : (support ? 'support' : null)
         }
     })
 }
