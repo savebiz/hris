@@ -2,8 +2,14 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createStaffSchema, CreateStaffValues } from '@/lib/schemas/admin'
+import { ProfileFormValues } from '@/lib/schemas/profile'
 import { revalidatePath } from 'next/cache'
 import { logAction } from '@/lib/audit'
+
+export async function createStaffAction(data: ProfileFormValues) {
+    return { error: "This form is deprecated. Please use the 'Add New Staff' button in the admin dashboard." }
+}
+
 
 export async function createStaff(data: CreateStaffValues) {
     const supabase = await createClient()
