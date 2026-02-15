@@ -15,7 +15,7 @@ export async function createStaff(data: CreateStaffValues) {
     // 2. Validate Input
     const result = createStaffSchema.safeParse(data)
     if (!result.success) {
-        return { error: "Invalid data: " + result.error.errors[0].message }
+        return { error: "Invalid data: " + result.error.issues[0].message }
     }
 
     // 3. Create Auth User (Requires Service Role Key)
