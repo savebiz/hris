@@ -346,7 +346,7 @@ export async function getProfileRequests() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return []
 
-    // Use Service Role to bypass RLS
+    // Use Service Role
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     if (!serviceKey) return []
 
@@ -357,17 +357,7 @@ export async function getProfileRequests() {
         { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // Join with profiles to know WHO is requesting
-    const { data, error } = await supabaseAdmin
-        .from('profile_change_requests')
-        .select(`
-            *,
-            profiles:user_id (id, full_name, email, avatar_url)
-        `)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: true })
-
-    // Fetch requests first
+    // Fetch requests first (Manual Join to avoid missing FK issues)
     const { data: requests, error } = await supabaseAdmin
         .from('profile_change_requests')
         .select('*')
