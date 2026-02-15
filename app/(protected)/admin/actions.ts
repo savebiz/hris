@@ -25,70 +25,71 @@ export async function createStaff(data: CreateStaffValues) {
     }
 
     // 3. Create Auth User (Requires Service Role Key)
-    // We try to create a client with the Service Role Key if available.
-    // If not, we cannot create an auth user server-side without an Invite flow.
-    // For this environment, we'll try to check if we can simply insert into profiles
-    // assuming the trigger handles it OR fail gracefully.
-
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    if (!serviceKey) {
-        return { error: "Server configuration error: Missing Service Role Key. cannot create users." }
-    }
+    if (!serviceKey) return { error: "Configuration Error: Service Role Key missing." }
 
-    // Create Admin Client
     const { createClient: createSupabaseClient } = require('@supabase/supabase-js')
     const supabaseAdmin = createSupabaseClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL,
         serviceKey,
-        {
-            auth: {
-                autoRefreshToken: false,
-                persistSession: false
-            }
-        }
+        { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
     // Create User
+    const finalRole = data.staff_category === 'support' ? 'support_staff' : data.role
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
         email: data.email,
-        email_confirm: true, // Auto-confirm
-        password: "TempPassword123!", // Temp password
-        user_metadata: {
-            full_name: data.full_name,
-            role: data.role // This might be used by triggers
-        }
+        email_confirm: true,
+        password: "TempPassword123!",
+        user_metadata: { full_name: data.full_name, role: finalRole }
     })
 
-    if (createError) {
-        console.error("Create User Error:", createError)
-        return { error: createError.message }
-    }
-
+    if (createError) return { error: createError.message }
     if (!newUser.user) return { error: "Failed to create user object" }
 
-    // 4. Update/Create Profile
-    // The trigger might have created the profile already.
-    // We should update it with the extra details.
-    // We'll upsert to be safe.
+    // 4. Create Profile
     const { error: profileError } = await supabaseAdmin
         .from('profiles')
         .upsert({
             id: newUser.user.id,
             email: data.email,
             full_name: data.full_name,
-            role: data.role,
-            department: data.department,
-            job_title: data.job_title,
+            role: finalRole,
+            phone_number: data.phone_number,
+            residential_address: data.residential_address,
             updated_at: new Date().toISOString()
         })
 
-    if (profileError) {
-        console.error("Profile Upsert Error:", profileError)
-        // Check if user was created but profile failed?
-        return { error: "User created but profile update failed: " + profileError.message }
+    if (profileError) return { error: "Profile Upsert Error: " + profileError.message }
+
+    // 5. Create Detail Record
+    if (data.staff_category === 'core') {
+        const { error: detailError } = await supabaseAdmin
+            .from('core_staff_details')
+            .upsert({
+                id: newUser.user.id,
+                staff_id: data.staff_id!,
+                job_title: data.job_title!,
+                department: data.department!,
+                date_of_employment: data.date_of_employment!,
+                employment_status: 'probation'
+            })
+        if (detailError) return { error: "Core Details Error: " + detailError.message }
+    } else {
+        const { error: detailError } = await supabaseAdmin
+            .from('support_staff_details')
+            .upsert({
+                id: newUser.user.id,
+                project_assignment: data.project_assignment!,
+                project_location: data.project_location!,
+                deployment_start_date: data.deployment_start_date!,
+                supervisor_name: data.supervisor_name!,
+                date_of_engagement: new Date().toISOString().split('T')[0] // Default to now if not provided
+            })
+        if (detailError) return { error: "Support Details Error: " + detailError.message }
     }
 
-    // 5. Audit
+    // 6. Audit
     const { error: auditError } = await supabase
         .from('audit_logs')
         .insert({
@@ -96,7 +97,7 @@ export async function createStaff(data: CreateStaffValues) {
             resource_type: 'profile',
             resource_id: newUser.user.id,
             actor_id: user.id,
-            details: { email: data.email, role: data.role }
+            details: { email: data.email, role: finalRole, category: data.staff_category }
         })
 
     revalidatePath('/admin/staff')
