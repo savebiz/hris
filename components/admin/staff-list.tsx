@@ -20,6 +20,9 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
+import { EditStaffDialog } from "@/components/admin/edit-staff-dialog"
 
 interface StaffProfile {
     id: string
@@ -38,8 +41,30 @@ interface StaffListProps {
 }
 
 export function StaffList({ data }: StaffListProps) {
+    const { toast } = useToast()
+    const router = useRouter()
+
     if (!data.length) {
         return <div className="p-4 text-center text-muted-foreground">No staff records found.</div>
+    }
+
+    const handleCopyEmail = (email: string | null) => {
+        if (!email) return
+        navigator.clipboard.writeText(email)
+        toast({ title: "Copied", description: "Email copied to clipboard" })
+    }
+
+    const handleDeactivate = async (id: string, name: string) => {
+        if (!confirm(`Are you sure you want to deactivate ${name}? They will no longer be able to log in.`)) return
+
+        const { deactivateStaff } = await import("@/app/(protected)/admin/actions")
+        const result = await deactivateStaff(id)
+        if (result.error) {
+            toast({ variant: "destructive", title: "Error", description: result.error })
+        } else {
+            toast({ title: "Deactivated", description: `${name} has been deactivated.` })
+            router.refresh()
+        }
     }
 
     return (
@@ -90,14 +115,23 @@ export function StaffList({ data }: StaffListProps) {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                    <DropdownMenuItem onClick={() => navigator.clipboard.writeText(staff.email || "")}>
+                                    <DropdownMenuItem onClick={() => handleCopyEmail(staff.email)}>
                                         Copy Email
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem>
-                                        <Edit className="mr-2 h-4 w-4" /> Edit Profile
+                                    {/* Edit Dialog Trigger - we render it here but it's a dialog trigger 
+                                        Note: Nesting dialog trigger inside dropdown menu can be tricky.
+                                        We use 'onSelect={(e) => e.preventDefault()}' to prevent dropdown closing immediately 
+                                        if using a controlled dialog, or use the Dialog structure carefully. 
+                                        Actually, EditStaffDialog is a trigger itself. */}
+                                    <DropdownMenuItem asChild onSelect={(e) => e.preventDefault()}>
+                                        <EditStaffDialog userId={staff.id} />
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem className="text-destructive">
+
+                                    <DropdownMenuItem
+                                        className="text-destructive focus:text-destructive"
+                                        onClick={() => handleDeactivate(staff.id, staff.full_name || "User")}
+                                    >
                                         <Trash className="mr-2 h-4 w-4" /> Deactivate
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
