@@ -4,6 +4,7 @@ import { getStaffList } from "@/app/(protected)/admin/actions"
 import { StaffList } from "@/components/admin/staff-list"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+import { AddStaffDialog } from "@/components/admin/add-staff-dialog"
 import {
     Card,
     CardContent,
@@ -25,9 +26,9 @@ export default async function StaffManagementPage() {
             <div className="flex items-center justify-between space-y-2">
                 <h2 className="text-3xl font-bold tracking-tight">Staff Management</h2>
                 <div className="flex items-center space-x-2">
-                    <Button>
-                        <Plus className="mr-2 h-4 w-4" /> Add New Staff
-                    </Button>
+                    <div className="flex items-center space-x-2">
+                        <AddStaffDialog />
+                    </div>
                 </div>
             </div>
 

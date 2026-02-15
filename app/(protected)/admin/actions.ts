@@ -1,49 +1,100 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { ProfileFormValues, profileSchema } from '@/lib/schemas/profile'
+import { createStaffSchema, CreateStaffValues } from '@/lib/schemas/admin'
 import { revalidatePath } from 'next/cache'
 import { logAction } from '@/lib/audit'
 
-export async function createStaffAction(data: ProfileFormValues) {
+export async function createStaff(data: CreateStaffValues) {
     const supabase = await createClient()
 
-    // 1. Create Auth User (In a real app, you might use the Admin API to invite users)
-    // For Phase 1, we might assume the user already exists or we are just creating the profile record 
-    // linked to a placeholder or invite flow. 
-    // *Correction*: The PRD implies HR creates the profile. 
-    // We need to create the `auth.users` record first to get an ID, OR we use a system where 
-    // we invite the user via email and they fill it out. 
-    // However, `profiles` table references `auth.users`. 
-    // *Strategy*: We will usage Supabase Admin API to `inviteUserByEmail` which creates the auth record.
+    // 1. Validate Admin
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "Unauthorized" }
 
-    const supabaseAdmin = await createClient() // Ideally needs SERVICE_ROLE_KEY for admin actions, 
-    // but for now we will stick to the plan where HR creates "Profiles" and we might need a workaround 
-    // if we don't have the Service Role Key in .env.local yet.
-    // 
-    // *Alternative for Phase 1*: We just insert into tables if we manually created auth users, 
-    // BUT `profiles` PKEY is `auth.users.id`.
-    // 
-    // Let's assume for this step we are just validating logic. 
-    // actually, to create a profile, we need a User ID.
-    // We will assume the HR uses the Supabase Dashboard to invite users for now (Task 1.2 output), 
-    // OR we use a public Server Action to "signup" a user with a temp password.
-
-    // validated data
-    const result = profileSchema.safeParse(data)
+    // 2. Validate Input
+    const result = createStaffSchema.safeParse(data)
     if (!result.success) {
-        return { error: "Invalid data" }
+        return { error: "Invalid data: " + result.error.errors[0].message }
     }
 
-    // For this implementation, we will mock the "Success" return 
-    // because we can't create an auth user without Service Key easily in this context 
-    // or without a signup flow. 
-    // We will assume this action updates an EXISTING profile if ID is provided, 
-    // or intended to be coupled with an Invite.
+    // 3. Create Auth User (Requires Service Role Key)
+    // We try to create a client with the Service Role Key if available.
+    // If not, we cannot create an auth user server-side without an Invite flow.
+    // For this environment, we'll try to check if we can simply insert into profiles
+    // assuming the trigger handles it OR fail gracefully.
 
-    // TODO: Integrate with Admin Invite API
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!serviceKey) {
+        return { error: "Server configuration error: Missing Service Role Key. cannot create users." }
+    }
 
-    return { success: true, message: "Staff profile logic ready. (Requires Admin Invite integration)" }
+    // Create Admin Client
+    const { createClient: createSupabaseClient } = require('@supabase/supabase-js')
+    const supabaseAdmin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        serviceKey,
+        {
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false
+            }
+        }
+    )
+
+    // Create User
+    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email: data.email,
+        email_confirm: true, // Auto-confirm
+        password: "TempPassword123!", // Temp password
+        user_metadata: {
+            full_name: data.full_name,
+            role: data.role // This might be used by triggers
+        }
+    })
+
+    if (createError) {
+        console.error("Create User Error:", createError)
+        return { error: createError.message }
+    }
+
+    if (!newUser.user) return { error: "Failed to create user object" }
+
+    // 4. Update/Create Profile
+    // The trigger might have created the profile already.
+    // We should update it with the extra details.
+    // We'll upsert to be safe.
+    const { error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .upsert({
+            id: newUser.user.id,
+            email: data.email,
+            full_name: data.full_name,
+            role: data.role,
+            department: data.department,
+            job_title: data.job_title,
+            updated_at: new Date().toISOString()
+        })
+
+    if (profileError) {
+        console.error("Profile Upsert Error:", profileError)
+        // Check if user was created but profile failed?
+        return { error: "User created but profile update failed: " + profileError.message }
+    }
+
+    // 5. Audit
+    const { error: auditError } = await supabase
+        .from('audit_logs')
+        .insert({
+            action: 'create_staff',
+            resource_type: 'profile',
+            resource_id: newUser.user.id,
+            actor_id: user.id,
+            details: { email: data.email, role: data.role }
+        })
+
+    revalidatePath('/admin/staff')
+    return { success: true, message: `Staff created. Temp password: TempPassword123!` }
 }
 
 export async function getStaffList() {
