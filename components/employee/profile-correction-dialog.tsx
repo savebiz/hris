@@ -22,8 +22,8 @@ export function ProfileCorrectionDialog({ profile }: { profile: any }) {
     const [loading, setLoading] = useState(false)
 
     // Form state
-    const [phone, setPhone] = useState(profile?.phone || '')
-    const [address, setAddress] = useState(profile?.address || '')
+    const [phone, setPhone] = useState(profile?.phone_number || '')
+    const [address, setAddress] = useState(profile?.residential_address || '')
     const [fullName, setFullName] = useState(profile?.full_name || '')
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -34,8 +34,8 @@ export function ProfileCorrectionDialog({ profile }: { profile: any }) {
         // For simplicity, send relevant editable fields.
         // We exclude email/role as those are strictly controlled.
         const changes: Record<string, any> = {}
-        if (phone !== profile?.phone) changes.phone = phone
-        if (address !== profile?.address) changes.address = address
+        if (phone !== profile?.phone_number) changes.phone_number = phone
+        if (address !== profile?.residential_address) changes.residential_address = address
         if (fullName !== profile?.full_name) changes.full_name = fullName
 
         if (Object.keys(changes).length === 0) {

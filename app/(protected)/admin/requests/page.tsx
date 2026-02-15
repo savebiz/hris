@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { CheckCircle, XCircle, ArrowRight } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { RequestActions } from "./request-actions"
 
 export const metadata: Metadata = {
     title: "Profile Requests - DataGuard HRIS",
@@ -52,23 +53,7 @@ export default async function ProfileRequestsPage() {
                                     </div>
 
                                     <div className="flex items-end justify-end gap-3 h-full">
-                                        <form action={async () => {
-                                            'use server'
-                                            await approveProfileRequest(req.id)
-                                        }}>
-                                            <Button className="bg-green-600 hover:bg-green-700">
-                                                <CheckCircle className="mr-2 h-4 w-4" /> Approve Update
-                                            </Button>
-                                        </form>
-
-                                        <form action={async () => {
-                                            'use server'
-                                            await rejectProfileRequest(req.id)
-                                        }}>
-                                            <Button variant="destructive">
-                                                <XCircle className="mr-2 h-4 w-4" /> Reject
-                                            </Button>
-                                        </form>
+                                        <RequestActions requestId={req.id} />
                                     </div>
                                 </div>
                             </CardContent>

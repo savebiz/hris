@@ -413,9 +413,20 @@ export async function approveProfileRequest(requestId: string) {
 
     // 2. Update the actual Profile
     // 'request.data' is jsonb, e.g. { phone: '123' }
+    // Map legacy keys if present
+    const updateData: any = { ...request.data }
+    if (updateData.phone) {
+        updateData.phone_number = updateData.phone
+        delete updateData.phone
+    }
+    if (updateData.address) {
+        updateData.residential_address = updateData.address
+        delete updateData.address
+    }
+
     const { error: updateError } = await supabaseAdmin
         .from('profiles')
-        .update(request.data)
+        .update(updateData)
         .eq('id', request.user_id)
 
     if (updateError) return { error: "Failed to update profile: " + updateError.message }
