@@ -135,16 +135,25 @@ export function EditStaffDialog({ userId }: EditStaffDialogProps) {
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 
-                            {/* Category - Disabled for Edit usually, but let's see. 
-                                Changing category might be complex (deleting from one table, adding to other).
-                                For now render it as disabled or read-only info */}
+                            {/* Category - Now Editable */}
                             <FormField
                                 control={form.control}
                                 name="staff_category"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Staff Category</FormLabel>
-                                        <div className="p-2 border rounded-md bg-muted text-sm capitalize">{field.value}</div>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select Category" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="core">Core Staff</SelectItem>
+                                                <SelectItem value="support">Support Staff</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />

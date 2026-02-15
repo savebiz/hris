@@ -509,7 +509,7 @@ export async function updateStaff(userId: string, data: CreateStaffValues) {
         { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // 1. Update Profile (Base)
+    // 1. Determine final role and update Profile
     const finalRole = data.staff_category === 'support' ? 'support_staff' : data.role
     const { error: profileError } = await supabaseAdmin.from('profiles').update({
         full_name: data.full_name,
@@ -522,25 +522,32 @@ export async function updateStaff(userId: string, data: CreateStaffValues) {
 
     if (profileError) return { error: "Profile Update Error: " + profileError.message }
 
-    // 2. Update Details
+    // 2. Handle Category Specifics (Upsert new, Delete old if switched)
     if (data.staff_category === 'core') {
-        const { error: detailError } = await supabaseAdmin.from('core_staff_details').upsert({
+        const { error: upsertError } = await supabaseAdmin.from('core_staff_details').upsert({
             id: userId,
             staff_id: data.staff_id!,
             job_title: data.job_title!,
             department: data.department!,
             date_of_employment: data.date_of_employment!,
-        }) // We don't overwrite employment_status blindly
-        if (detailError) return { error: "Core Details Update Error: " + detailError.message }
+        })
+        if (upsertError) return { error: "Core Details Update Error: " + upsertError.message }
+
+        // Cleanup support details if they exist (user switched)
+        await supabaseAdmin.from('support_staff_details').delete().eq('id', userId)
+
     } else {
-        const { error: detailError } = await supabaseAdmin.from('support_staff_details').upsert({
+        const { error: upsertError } = await supabaseAdmin.from('support_staff_details').upsert({
             id: userId,
             project_assignment: data.project_assignment!,
             project_location: data.project_location!,
             deployment_start_date: data.deployment_start_date!,
             supervisor_name: data.supervisor_name!,
         })
-        if (detailError) return { error: "Support Details Update Error: " + detailError.message }
+        if (upsertError) return { error: "Support Details Update Error: " + upsertError.message }
+
+        // Cleanup core details if they exist (user switched)
+        await supabaseAdmin.from('core_staff_details').delete().eq('id', userId)
     }
 
     // 3. Audit
@@ -549,7 +556,7 @@ export async function updateStaff(userId: string, data: CreateStaffValues) {
         resourceType: 'profile',
         resourceId: userId,
         actorId: user.id,
-        details: { role: finalRole, changes: data }
+        details: { role: finalRole, changes: data, category_switch: true }
     })
 
     revalidatePath('/admin/staff')
