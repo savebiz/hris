@@ -367,11 +367,34 @@ export async function getProfileRequests() {
         .eq('status', 'pending')
         .order('created_at', { ascending: true })
 
+    // Fetch requests first
+    const { data: requests, error } = await supabaseAdmin
+        .from('profile_change_requests')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: true })
+
     if (error) {
         console.error("Error fetching profile requests:", error)
         return []
     }
-    return data
+
+    if (!requests || requests.length === 0) return []
+
+    // Fetch profiles for these requests
+    const userIds = Array.from(new Set(requests.map((r: any) => r.user_id)))
+    const { data: profiles } = await supabaseAdmin
+        .from('profiles')
+        .select('id, full_name, email, avatar_url')
+        .in('id', userIds)
+
+    const profileMap = new Map(profiles?.map((p: any) => [p.id, p]) || [])
+
+    // Merge
+    return requests.map((r: any) => ({
+        ...r,
+        profiles: profileMap.get(r.user_id) || { full_name: 'Unknown User', email: 'N/A' }
+    }))
 }
 
 export async function approveProfileRequest(requestId: string) {
