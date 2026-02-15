@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache'
 import { logAction } from '@/lib/audit'
 
 export async function createStaffAction(data: ProfileFormValues) {
-    return { error: "This form is deprecated. Please use the 'Add New Staff' button in the admin dashboard." }
+    return { error: "This form is deprecated. Please use the 'Add New Staff' button in the admin dashboard.", message: "" }
 }
 
 
